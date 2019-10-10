@@ -86,9 +86,6 @@ func ChainInfo() *text.Text {
 		if err:= widget.Write("\nBlock Reward: " + data.BlockReward); err != nil {
 			panic(err)
 		}
-		if err:= widget.Write("\nBingo: " + data.Bingo); err != nil {
-			panic(err)
-		}
 	})
 	
 	return widget

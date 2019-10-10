@@ -18,14 +18,14 @@ import (
 )
 
 func main() {
-	// start go routine to tail the log file
-	go src.TailZeroLogFile()
-
 	// setting up config varibales
 	env := flag.String("env", "local", "environment")
 	flag.Parse()
 	config.SetConfig(*env)
 	
+	// start go routine to tail the log file
+	go src.TailZeroLogFile()
+
 	t, err := termbox.New()
 	if err!=nil {
 		panic(err)

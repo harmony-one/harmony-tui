@@ -1,2 +1,10 @@
 # harmony-tui
-Text based used interface for Harmony node
+Text based user interface for Harmony node.
+
+# Build
+Invoke `make` to build `harmony-tui` binary
+
+# Usage
+Invoke binary - `path_to_binary/harmony-tui`
+
+# Sample screenshot

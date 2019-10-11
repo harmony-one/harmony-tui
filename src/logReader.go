@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"encoding/json"
 
-	"harmony-tui/src/data"
-	"harmony-tui/config"
+	"github.com/harmony-one/harmony-tui/src/data"
+	"github.com/harmony-one/harmony-tui/config"
 )
 
 var previousJSONString = ""
@@ -17,7 +17,7 @@ var previousJSONString = ""
 func TailZeroLogFile() {
 	fname := GetLogFilePath("zerolog")
 	
-	ticker := time.NewTicker(5000 * time.Millisecond)
+	ticker := time.NewTicker(config.SystemStatsInterval)
 	defer ticker.Stop()
 	
 	file, err := os.Open(fname)

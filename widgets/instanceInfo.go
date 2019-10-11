@@ -7,9 +7,9 @@ import (
 	"io/ioutil"
 	"log"
 
-	"harmony-tui/src"
-	"harmony-tui/src/data"
-	"harmony-tui/config"
+	"github.com/harmony-one/harmony-tui/src"
+	"github.com/harmony-one/harmony-tui/src/data"
+	"github.com/harmony-one/harmony-tui/config"
 
 	"github.com/hpcloud/tail"
 	"github.com/mum4k/termdash/cell"
@@ -154,7 +154,7 @@ func LogInfo(ctx context.Context) *text.Text {
 
 func refreshLog(ctx context.Context, widget *text.Text) {
 
-	ticker := time.NewTicker(3000*time.Millisecond)
+	ticker := time.NewTicker(config.BlockchainInterval)
 	defer ticker.Stop()
 	fname := src.GetLogFilePath("validator")
 

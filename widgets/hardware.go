@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 	
+	"github.com/harmony-one/harmony-tui/config"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
@@ -51,7 +52,7 @@ func diskUsage() int {
 
 func refresh(ctx context.Context, gauge *gauge.Gauge, f fn) {
 
-	ticker := time.NewTicker(250*time.Millisecond)
+	ticker := time.NewTicker(config.SystemStatsInterval)
 	defer ticker.Stop()
 
 	for {

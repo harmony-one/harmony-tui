@@ -4,8 +4,8 @@ import(
 	"strconv"
 	"time"
 	
-	"harmony-tui/src/rpc"
-	"harmony-tui/config"
+	"github.com/harmony-one/harmony-tui/src/rpc"
+	"github.com/harmony-one/harmony-tui/config"
 )
 
 var BlockData map[string]interface{}
@@ -34,7 +34,7 @@ func init() {
 
 func refreshData(){
 
-	ticker := time.NewTicker(3000*time.Millisecond)
+	ticker := time.NewTicker(config.BlockchainInterval)
 	defer ticker.Stop()
 
 	for {

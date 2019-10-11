@@ -3,8 +3,6 @@ package data
 import(
 	"strconv"
 	"time"
-	"fmt"
-	"os"
 	
 	"github.com/harmony-one/harmony-tui/src/rpc"
 	"github.com/harmony-one/harmony-tui/config"
@@ -30,7 +28,7 @@ var NoOfTransaction int
 var StateRoot string
 var PeerCount int64
 
-var Quitter func()
+var Quitter func(string)
 
 func init() {
 	go refreshData()
@@ -46,9 +44,8 @@ func refreshData(){
 		case <- ticker.C:
 			latestHeader, err := rpc.Request("hmy_latestHeader", config.HmyURL, []interface{}{})
 			if err!=nil {
-				Quitter()
-				fmt.Printf("Error fetching data from rpc call hmy_latestHeader\n" + err.Error())
-				os.Exit(1)
+				Quitter(err.Error() + " to hmy_latestHeader")
+				return
 			}
 			BlockHash, _ = latestHeader["result"].(map[string]interface{})["blockHash"].(string)
 			BlockNumber, _ = latestHeader["result"].(map[string]interface{})["blockNumber"].(float64)

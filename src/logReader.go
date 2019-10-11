@@ -58,8 +58,6 @@ func TailZeroLogFile() {
 								data.OnPrepared = time
 							case strings.Contains(message, "[Block Reward]") :
 								data.BlockReward = time
-							case strings.Contains(message, "BINGO") :
-								data.Bingo = time
 							case strings.Contains(message, "[OnCommitted]") :
 								data.OnCommitted = time
 							}

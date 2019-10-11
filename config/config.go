@@ -2,6 +2,7 @@ package config
 
 import(
 	"time"
+	"os/user"
 )
 
 var (
@@ -14,8 +15,13 @@ var (
 
 func SetConfig(env string) {
 	if env=="local" {
-		LogPath = "/Users/manish/go/src/github.com/harmony-one/harmony/tmp_log/"
-		HarmonyPath = "/Users/manish/go/src/github.com/harmony-one/harmony/bin/"
+		usr, err := user.Current()
+		if err != nil {
+			panic( err )
+		}
+		LogPath = usr.HomeDir + "/go/src/github.com/harmony-one/harmony/tmp_log/"
+		HarmonyPath = usr.HomeDir + "/go/src/github.com/harmony-one/harmony/bin/"
+		
 		BlockchainInterval = 3000*time.Millisecond
 		SystemStatsInterval = 250*time.Millisecond
 	} else if env=="ec2" {

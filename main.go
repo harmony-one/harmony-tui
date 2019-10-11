@@ -1,28 +1,45 @@
 package main
 
 import (
-	"github.com/mum4k/termdash/keyboard"
 	"context"
 	"flag"
+	"os"
+	"path"
+	"fmt"
 
-	"harmony-tui/widgets"
-	"harmony-tui/src"
-	"harmony-tui/config"
+	"github.com/harmony-one/harmony-tui/widgets"
+	"github.com/harmony-one/harmony-tui/src"
+	"github.com/harmony-one/harmony-tui/config"
 	
 	"github.com/mum4k/termdash"
 	"github.com/mum4k/termdash/linestyle"
 	"github.com/mum4k/termdash/terminal/terminalapi"
+	"github.com/mum4k/termdash/keyboard"
 	"github.com/mum4k/termdash/container"
 	"github.com/mum4k/termdash/terminal/termbox"
 	"github.com/mum4k/termdash/container/grid"
 )
 
+var (
+	version string
+	commit  string
+	builtAt string
+	builtBy string
+)
+
 func main() {
 	// setting up config varibales
-	env := flag.String("env", "local", "environment")
+	env := flag.String("env", "local", "environment of system binary is running on option 1- \"local\" option 2- \"ec2\"")
+	showVersion := flag.Bool("version", false, "version of the binary")
 	flag.Parse()
 	config.SetConfig(*env)
 	
+	if *showVersion {
+		fmt.Fprintf(os.Stderr,
+			"Harmony (C) 2019. %v, version %v-%v (%v %v)\n",
+			path.Base(os.Args[0]), version, commit, builtBy, builtAt)
+		os.Exit(0)
+	}
 	// start go routine to tail the log file
 	go src.TailZeroLogFile()
 

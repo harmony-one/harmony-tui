@@ -77,7 +77,7 @@ func GetLogFilePath(prefix string) string {
 	var file string
 	
 	err := filepath.Walk(root, func(path string, info os.FileInfo,err error) error {
-		
+		//fmt.Println(path)
 		if (strings.HasPrefix(info.Name(), prefix) && strings.HasSuffix(info.Name(),".log")){
 			if lastModified.Before(info.ModTime()) {
 				file = path

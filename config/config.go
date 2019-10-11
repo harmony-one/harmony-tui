@@ -17,11 +17,11 @@ func SetConfig(env string) {
 		LogPath = "/Users/manish/go/src/github.com/harmony-one/harmony/tmp_log/"
 		HarmonyPath = "/Users/manish/go/src/github.com/harmony-one/harmony/bin/"
 		BlockchainInterval = 3000*time.Millisecond
-		SystemStatsInterval = 500*time.Millisecond
+		SystemStatsInterval = 250*time.Millisecond
 	} else if env=="ec2" {
 		LogPath = "./latest/"
 		HarmonyPath = "./"
 		BlockchainInterval = 5000*time.Millisecond
-		SystemStatsInterval = 250*time.Millisecond
+		SystemStatsInterval = 500*time.Millisecond
 	}
 }

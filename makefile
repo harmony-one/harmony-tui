@@ -11,18 +11,20 @@ commit := $(shell git describe --always --long --dirty)
 built_at := $(shell date +%FT%T%z)
 built_by := ${USER}@harmony.one
 
+env := GO111MODULE=on
+
 ldflags := -X main.version=v${version} -X main.commit=${commit}
 ldflags += -X main.builtAt=${built_at} -X main.builtBy=${built_by}
 
 all: build
 build: 
-		$(GOBUILD) -o $(BINARY_NAME) -v -ldflags="$(ldflags)"  main.go
+		$(env) $(GOBUILD) -o $(BINARY_NAME) -v -ldflags="$(ldflags)"  main.go
 clean: 
 		$(GOCLEAN)
 		rm -f $(BINARY_NAME)
 		rm -f $(BINARY_UNIX)
 run:
-		$(GOBUILD) -o $(BINARY_NAME) -v ./...
+		$(env) $(GOBUILD) -o $(BINARY_NAME) -v ./...
 		./$(BINARY_NAME)
 deps:
 		$(GOGET) github.com/mum4k/termdash
@@ -30,4 +32,4 @@ deps:
 
 # Cross compilation
 build-linux:
-		GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_UNIX) -v -ldflags="$(ldflags)"
+		$(env) GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_UNIX) -v -ldflags="$(ldflags)"

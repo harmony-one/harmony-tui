@@ -21,5 +21,7 @@ func SetConfig(env string) {
 	} else if env=="ec2" {
 		LogPath = "./latest/"
 		HarmonyPath = "./"
+		BlockchainInterval = 5000*time.Millisecond
+		SystemStatsInterval = 250*time.Millisecond
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"path"
 	"fmt"
 
+	"github.com/harmony-one/harmony-tui/src/data"
 	"github.com/harmony-one/harmony-tui/widgets"
 	"github.com/harmony-one/harmony-tui/src"
 	"github.com/harmony-one/harmony-tui/config"
@@ -47,8 +48,7 @@ func main() {
 	if err!=nil {
 		panic(err)
 	}
-	defer t.Close()
-
+	
 	ctx, cancel := context.WithCancel(context.Background())
 
 	builder := grid.New()
@@ -90,13 +90,21 @@ func main() {
 	}
 
 	// logic to quite from TUI
-	quitter := func(k *terminalapi.Keyboard) {
+	quit := func(k *terminalapi.Keyboard) {
 		if k.Key == 'q' || k.Key == 'Q' || k.Key == keyboard.KeyEsc {
-			cancel()
+			data.Quitter("")
 		}
 	}
+	
+	// function to handle graceful exit along with exit message
+	data.Quitter = func(exitMsg string) {
+		cancel()
+		t.Close()
+		exitMsg = exitMsg + "\n"
+		fmt.Fprintf(os.Stderr, exitMsg)
+	}
 
-	if err := termdash.Run(ctx, t, c, termdash.KeyboardSubscriber(quitter)); err != nil {
+	if err := termdash.Run(ctx, t, c, termdash.KeyboardSubscriber(quit)); err != nil {
 		panic(err)
 	}
 }

@@ -28,6 +28,8 @@ var NoOfTransaction int
 var StateRoot string
 var PeerCount int64
 
+var Quitter func(string)
+
 func init() {
 	go refreshData()
 }
@@ -41,7 +43,10 @@ func refreshData(){
 		select {
 		case <- ticker.C:
 			latestHeader, err := rpc.Request("hmy_latestHeader", config.HmyURL, []interface{}{})
-
+			if err!=nil {
+				Quitter(err.Error() + " to hmy_latestHeader")
+				return
+			}
 			BlockHash, _ = latestHeader["result"].(map[string]interface{})["blockHash"].(string)
 			BlockNumber, _ = latestHeader["result"].(map[string]interface{})["blockNumber"].(float64)
 			ShardID, _ = latestHeader["result"].(map[string]interface{})["shardID"].(float64)

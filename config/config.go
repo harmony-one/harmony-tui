@@ -2,7 +2,8 @@ package config
 
 import(
 	"time"
-	"os/user"
+	"os"
+	"go/build"
 )
 
 var (
@@ -15,12 +16,12 @@ var (
 
 func SetConfig(env string) {
 	if env=="local" {
-		usr, err := user.Current()
-		if err != nil {
-			panic( err )
+		gopath := os.Getenv("GOPATH")
+		if gopath == "" {
+			gopath = build.Default.GOPATH
 		}
-		LogPath = usr.HomeDir + "/go/src/github.com/harmony-one/harmony/tmp_log/"
-		HarmonyPath = usr.HomeDir + "/go/src/github.com/harmony-one/harmony/bin/"
+		LogPath = gopath + "/src/github.com/harmony-one/harmony/tmp_log/"
+		HarmonyPath = gopath + "/src/github.com/harmony-one/harmony/bin/"
 		
 		BlockchainInterval = 3000*time.Millisecond
 		SystemStatsInterval = 250*time.Millisecond

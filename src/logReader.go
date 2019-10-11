@@ -75,9 +75,17 @@ func GetLogFilePath(prefix string) string {
 	root := config.LogPath
 	lastModified := time.Time{}
 	var file string
+	check, err := exists(root)
 	
-	err := filepath.Walk(root, func(path string, info os.FileInfo,err error) error {
-		//fmt.Println(path)
+	if err!=nil {
+		panic(err)
+	}
+	if !check {
+		fmt.Println("Log file not found.\n" + root + " does not exists")
+		os.Exit(1)
+	}
+
+	err = filepath.Walk(root, func(path string, info os.FileInfo,err error) error {
 		if (strings.HasPrefix(info.Name(), prefix) && strings.HasSuffix(info.Name(),".log")){
 			if lastModified.Before(info.ModTime()) {
 				file = path
@@ -90,4 +98,12 @@ func GetLogFilePath(prefix string) string {
 		panic(err)
 	}
 	return file
+}
+
+// exists returns whether the given file or directory exists
+func exists(path string) (bool, error) {
+    _, err := os.Stat(path)
+    if err == nil { return true, nil }
+    if os.IsNotExist(err) { return false, nil }
+    return true, err
 }

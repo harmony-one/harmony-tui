@@ -7,6 +7,7 @@ import (
 	"path"
 	"fmt"
 
+	"github.com/harmony-one/harmony-tui/src/data"
 	"github.com/harmony-one/harmony-tui/widgets"
 	"github.com/harmony-one/harmony-tui/src"
 	"github.com/harmony-one/harmony-tui/config"
@@ -90,13 +91,17 @@ func main() {
 	}
 
 	// logic to quite from TUI
-	quitter := func(k *terminalapi.Keyboard) {
+	quit := func(k *terminalapi.Keyboard) {
 		if k.Key == 'q' || k.Key == 'Q' || k.Key == keyboard.KeyEsc {
-			cancel()
+			data.Quitter()
 		}
 	}
+	data.Quitter = func() {
+		cancel()
+	}
 
-	if err := termdash.Run(ctx, t, c, termdash.KeyboardSubscriber(quitter)); err != nil {
+
+	if err := termdash.Run(ctx, t, c, termdash.KeyboardSubscriber(quit)); err != nil {
 		panic(err)
 	}
 }

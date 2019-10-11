@@ -5,9 +5,9 @@ import (
 	"context"
 	"flag"
 
-	"text-based-ui/widgets"
-	"text-based-ui/src"
-	"text-based-ui/config"
+	"harmony-tui/widgets"
+	"harmony-tui/src"
+	"harmony-tui/config"
 	
 	"github.com/mum4k/termdash"
 	"github.com/mum4k/termdash/linestyle"

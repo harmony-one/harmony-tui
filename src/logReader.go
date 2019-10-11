@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"encoding/json"
 
-	"text-based-ui/src/data"
-	"text-based-ui/config"
+	"harmony-tui/src/data"
+	"harmony-tui/config"
 )
 
 var previousJSONString = ""
@@ -25,21 +25,19 @@ func TailZeroLogFile() {
 		panic(err)
 	}
 	defer file.Close()
-	buf := make([]byte, 10240)
+	buf := make([]byte, 20480)
 	
 	for {
 		select {
 		case <- ticker.C:
 			stat, err := os.Stat(fname)
-			start := stat.Size() - 10240
+			start := stat.Size() - 20480
 			_, err = file.ReadAt(buf, start)
 			if err == nil {
 				jsonArray := strings.Split(fmt.Sprintf("%s\n", buf), "{\"level\":")
-				foundSigner := false
 				for i:=0; i<len(jsonArray); i++ {
-					if !foundSigner && strings.Contains(jsonArray[i], "Signers") {
+					if strings.Contains(jsonArray[i], "Signers") {
 						json.Unmarshal([]byte("{\"level\":" + jsonArray[i]),&data.BlockData)
-						foundSigner = false
 					}
 					if strings.Contains(jsonArray[i], "\"message\":\"[") {
 						var temp map[string]interface{}

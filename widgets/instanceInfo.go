@@ -7,9 +7,9 @@ import (
 	"io/ioutil"
 	"log"
 
-	"text-based-ui/src"
-	"text-based-ui/src/data"
-	"text-based-ui/config"
+	"harmony-tui/src"
+	"harmony-tui/src/data"
+	"harmony-tui/config"
 
 	"github.com/hpcloud/tail"
 	"github.com/mum4k/termdash/cell"
@@ -99,7 +99,6 @@ func BlockInfo() *text.Text {
 	}
 
 	go refreshWidget( func(){
-		//initializeData()
 		widget.Reset()
 		if err:= widget.Write("Current BlockNumber: " + strconv.FormatFloat(data.BlockNumber, 'f', 0, 64) + ", size: " + strconv.FormatInt(data.SizeInt,10)); err != nil {
 			panic(err)
@@ -181,7 +180,7 @@ func refreshLog(ctx context.Context, widget *text.Text) {
 
 func refreshWidget( f func()) {
 
-	ticker := time.NewTicker(250*time.Millisecond)
+	ticker := time.NewTicker(500*time.Millisecond)
 	defer ticker.Stop()
 
 	for {

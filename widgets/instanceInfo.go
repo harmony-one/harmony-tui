@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/harmony-one/harmony-tui/config"
+	"github.com/harmony-one/harmony-tui/data"
 	"github.com/harmony-one/harmony-tui/src"
-	"github.com/harmony-one/harmony-tui/src/data"
 
 	"github.com/hpcloud/tail"
 	"github.com/mum4k/termdash/cell"

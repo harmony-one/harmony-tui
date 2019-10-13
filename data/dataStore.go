@@ -99,3 +99,7 @@ func hexToNum(hex string) int64 {
 func numToHex(num float64) string {
 	return "0x" + strconv.FormatInt(int64(num), 16)
 }
+
+func SetOneAddress(addr string) {
+   OneAddress = addr
+}

@@ -16,7 +16,7 @@ func GetLineChart() *linechart.LineChart {
 		panic(err)
 	}
 
-	lc.Series("first", []float64{5,20,40},
+	lc.Series("first", []float64{5, 20, 40},
 		linechart.SeriesCellOpts(cell.FgColor(cell.ColorBlue)),
 		linechart.SeriesXLabels(map[int]string{
 			0: "zero",

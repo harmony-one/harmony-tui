@@ -1,10 +1,11 @@
 package data
 
-import(
+import (
+	"encoding/json"
 	"strconv"
 	"time"
-	
-	"github.com/harmony-one/harmony-tui/src/rpc"
+
+	"github.com/harmony-one/go-sdk/pkg/rpc"
 	"github.com/harmony-one/harmony-tui/config"
 )
 
@@ -27,6 +28,9 @@ var SizeInt int64
 var NoOfTransaction int
 var StateRoot string
 var PeerCount int64
+var OneAddress string
+var Balance string
+var AppVersion string
 
 var Quitter func(string)
 
@@ -34,17 +38,16 @@ func init() {
 	go refreshData()
 }
 
-func refreshData(){
+func refreshData() {
 
 	ticker := time.NewTicker(config.BlockchainInterval)
 	defer ticker.Stop()
 
 	for {
 		select {
-		case <- ticker.C:
+		case <-ticker.C:
 			latestHeader, err := rpc.Request("hmy_latestHeader", config.HmyURL, []interface{}{})
-			if err!=nil {
-				Quitter(err.Error() + " to hmy_latestHeader")
+			if err != nil {
 				return
 			}
 			BlockHash, _ = latestHeader["result"].(map[string]interface{})["blockHash"].(string)
@@ -56,13 +59,13 @@ func refreshData(){
 			hexaBlockNumber := numToHex(BlockNumber)
 
 			peerCountRply, err := rpc.Request(rpc.Method.PeerCount, config.HmyURL, []interface{}{})
-			if err!=nil {
+			if err != nil {
 				panic(err)
 			}
 			tempPeerCount, _ := peerCountRply["result"].(string)
 			PeerCount = hexToNum(tempPeerCount)
 			latestBlock, err := rpc.Request(rpc.Method.GetBlockByNumber, config.HmyURL, []interface{}{hexaBlockNumber, true})
-			if err!=nil {
+			if err != nil {
 				panic(err)
 			}
 			size, _ := latestBlock["result"].(map[string]interface{})["size"].(string)
@@ -70,6 +73,20 @@ func refreshData(){
 			temp, _ := latestBlock["result"].(map[string]interface{})["transactions"].([]string)
 			NoOfTransaction = len(temp)
 			StateRoot, _ = latestBlock["result"].(map[string]interface{})["stateRoot"].(string)
+			Balance, err = CheckAllShards(config.HmyURL, OneAddress, true)
+			if err != nil {
+				Balance = "No data"
+			} else {
+				var temp []map[string]interface{}
+				err := json.Unmarshal([]byte(Balance), &temp)
+				if err != nil {
+					panic(err)
+				}
+				Balance = "Address: " + OneAddress
+				for _, b := range temp {
+					Balance += "\n Balance in Shard " + strconv.FormatFloat(b["shard"].(float64), 'f', 0, 64) + ":  " + strconv.FormatFloat(b["amount"].(float64), 'f', 4, 64)
+				}
+			}
 		}
 	}
 }

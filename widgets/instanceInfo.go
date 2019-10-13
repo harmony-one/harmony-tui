@@ -124,16 +124,22 @@ func BlockInfo() *text.Text {
 				panic(err)
 			}
 		} else {
-			if err := widget.Write("\n BlockEpoch: " + strconv.FormatFloat(data.BlockData["blockEpoch"].(float64), 'f', 0, 64)); err != nil {
-				panic(err)
+			if blockEpoch := data.BlockData["blockEpoch"]; blockEpoch!=nil{
+				if err := widget.Write("\n BlockEpoch: " + strconv.FormatFloat(blockEpoch.(float64), 'f', 0, 64)); err != nil {
+					panic(err)
+				}
 			}
 
-			if err := widget.Write("\n Number of signers: " + data.BlockData["NumAccounts"].(string)); err != nil {
-				panic(err)
+			if numAccounts := data.BlockData["NumAccounts"]; numAccounts!=nil{
+				if err := widget.Write("\n Number of signers: " + numAccounts.(string)); err != nil {
+					panic(err)
+				}
 			}
 
-			if err := widget.Write("\n BlockShard: " + strconv.FormatFloat(data.BlockData["blockShard"].(float64), 'f', 0, 64)); err != nil {
-				panic(err)
+			if blockShard := data.BlockData["blockShard"]; blockShard!=nil{
+				if err := widget.Write("\n BlockShard: " + strconv.FormatFloat(blockShard.(float64), 'f', 0, 64)); err != nil {
+					panic(err)
+				}
 			}
 		}
 	})
@@ -152,8 +158,6 @@ func LogInfo(ctx context.Context) *text.Text {
 
 func refreshLog(ctx context.Context, widget *text.Text) {
 
-	ticker := time.NewTicker(config.BlockchainInterval)
-	defer ticker.Stop()
 	fname, err := src.GetLogFilePath("validator")
 	if err != nil {
 		if err = widget.Write(err.Error()); err != nil {
@@ -161,21 +165,15 @@ func refreshLog(ctx context.Context, widget *text.Text) {
 		}
 		return
 	}
-	for {
-		select {
-		case <-ticker.C:
-			t, err := tail.TailFile(fname, tail.Config{Follow: true, MustExist: false, Logger: log.New(ioutil.Discard, "", 0), Location: &tail.SeekInfo{Offset: 1, Whence: 2}})
+	
+	t, err := tail.TailFile(fname, tail.Config{Follow: true, MustExist: false, Logger: log.New(ioutil.Discard, "", 0), Location: &tail.SeekInfo{Offset: 1, Whence: 2}})
 
-			for line := range t.Lines {
-				if err = widget.Write(line.Text); err != nil {
-					panic(err)
-				}
-				if err = widget.Write("\n"); err != nil {
-					panic(err)
-				}
-			}
-		case <-ctx.Done():
-			return
+	for line := range t.Lines {
+		if err = widget.Write(line.Text); err != nil {
+			panic(err)
+		}
+		if err = widget.Write("\n"); err != nil {
+			panic(err)
 		}
 	}
 }

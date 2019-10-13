@@ -3,7 +3,7 @@ GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
-BINARY_DIR=bin
+BINARY_DIR=$(PWD)/bin
 BINARY_NAME=harmony-tui
 BINARY_UNIX=$(BINARY_NAME)-unix
 
@@ -34,6 +34,9 @@ run: build
 deps:
 		$(GOGET) github.com/mum4k/termdash
 		$(GOGET) github.com/hpcloud/tail
+
+upload:
+		scripts/upload.sh $(BINARY_DIR)
 
 # Cross compilation
 build-linux:

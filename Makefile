@@ -29,7 +29,7 @@ clean:
 		rm -f $(BINARY_DIR)/$(BINARY_UNIX)
 
 run: build
-		./$(BINARY_DIR)/$(BINARY_NAME)
+		$(BINARY_DIR)/$(BINARY_NAME)
 
 deps:
 		$(GOGET) github.com/mum4k/termdash

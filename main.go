@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/harmony-one/harmony-tui/config"
+	data "github.com/harmony-one/harmony-tui/data"
 	"github.com/harmony-one/harmony-tui/src"
-	"github.com/harmony-one/harmony-tui/src/data"
 	"github.com/harmony-one/harmony-tui/widgets"
 
 	"github.com/mum4k/termdash"
@@ -36,7 +36,8 @@ func main() {
 	addr := flag.String("address", "Not Provided", "address of your one account")
 	flag.Parse()
 	config.SetConfig(*env)
-	data.OneAddress = *addr
+
+	data.SetOneAddress(*addr)
 
 	if *showVersion {
 		fmt.Fprintf(os.Stderr,

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/harmony-one/harmony-tui/config"
-	"github.com/harmony-one/harmony-tui/src/data"
+	"github.com/harmony-one/harmony-tui/data"
 )
 
 var previousJSONString = ""

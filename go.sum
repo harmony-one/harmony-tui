@@ -164,6 +164,7 @@ github.com/harmony-one/harmony v0.0.0-20191012231929-8b5a3235fd6f h1:HdFu2dQUQZC
 github.com/harmony-one/harmony v0.0.0-20191012231929-8b5a3235fd6f/go.mod h1:F9/4Jj858j4th+pDeTAR434vS07nVz87TOFLYrpxJpc=
 github.com/harmony-one/harmony-tui v0.0.0-20191011223633-5ba02df557e8 h1:g2/9HG9M4X8ZZdZ9qCyOsWSExucVAGHFnxpVvGYdMro=
 github.com/harmony-one/harmony-tui v0.0.0-20191011223633-5ba02df557e8/go.mod h1:RBztVKIaUoiOHzq6bsntJ6VB/FiaQVjzMRMnVVkYKqM=
+github.com/harmony-one/harmony-tui v0.0.0-20191013045332-0967fff9e195 h1:8c60TpHMtqWDZy+zujGijDEs+3ryB7uOBw4+EfOlAEc=
 github.com/harmony-one/taggedrlp v0.1.2 h1:lAHV4UhBE45W+i7duAAWOgaQNUjDIG6rUydz/5Oqric=
 github.com/harmony-one/taggedrlp v0.1.2/go.mod h1:AK7o802368ESS3v4WZI5DzaHv9q0CsdgR9jPVJ6zleg=
 github.com/harmony-one/vdf v0.0.0-20190924175951-620379da8849/go.mod h1:EgNU7X5HLNBBho+OqCm1A1NrpD6xb1SHfi9pMCYaKKw=
@@ -213,10 +214,12 @@ github.com/kisielk/gotool v0.0.0-20161130080628-0de1eaf82fa3/go.mod h1:jxZFDH7IL
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/kkdai/bstream v0.0.0-20161212061736-f391b8402d23/go.mod h1:J+Gs4SYgM6CZQHDETBtE9HaSEkGmuNXF86RwHhHUvq4=
 github.com/klauspost/compress v1.4.0/go.mod h1:RyIbtBH6LamlWaDj8nUwkbUhJ87Yi3uG0guNDohfE1A=
+github.com/klauspost/compress v1.4.1 h1:8VMb5+0wMgdBykOV96DwNwKFQ+WTI4pzYURP99CcB9E=
 github.com/klauspost/compress v1.4.1/go.mod h1:RyIbtBH6LamlWaDj8nUwkbUhJ87Yi3uG0guNDohfE1A=
 github.com/klauspost/compress v1.8.2 h1:Bx0qjetmNjdFXASH02NSAREKpiaDwkO1DRZ3dV2KCcs=
 github.com/klauspost/compress v1.8.2/go.mod h1:RyIbtBH6LamlWaDj8nUwkbUhJ87Yi3uG0guNDohfE1A=
 github.com/klauspost/cpuid v0.0.0-20180405133222-e7e905edc00e/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
+github.com/klauspost/cpuid v1.2.0 h1:NMpwD2G9JSFOE1/TJjGSo5zG7Yb2bTe7eq1jH+irmeE=
 github.com/klauspost/cpuid v1.2.0/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
 github.com/klauspost/cpuid v1.2.1 h1:vJi+O/nMdFt0vqm8NZBI6wzALWdA2X+egi0ogNyrC/w=
 github.com/klauspost/cpuid v1.2.1/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
@@ -461,6 +464,7 @@ github.com/tyler-smith/go-bip39 v1.0.2/go.mod h1:sJ5fKU0s6JVwZjjcUEX2zFOnvq0ASQ2
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=
 github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
+github.com/valyala/fasthttp v1.2.0 h1:dzZJf2IuMiclVjdw0kkT+f9u4YdrapbNyGAN47E/qnk=
 github.com/valyala/fasthttp v1.2.0/go.mod h1:4vX61m6KN+xDduDNwXrhIAVZaZaZiQ1luJk8LWSxF3s=
 github.com/valyala/fasthttp v1.5.0 h1:dhq+O9pmNZFF6qAXpasMO1xSm7dL4qEz2ylfZN8BG9w=
 github.com/valyala/fasthttp v1.5.0/go.mod h1:eriCz9OhZjKCGfJ185a/IDgNl0bg9IbzfpcslMZXU1c=

@@ -22,7 +22,7 @@ func TailZeroLogFile() {
 		return
 	}
 
-	ticker := time.NewTicker(config.SystemStatsInterval)
+	ticker := time.NewTicker(config.BlockchainInterval)
 	defer ticker.Stop()
 
 	file, err := os.Open(fname)
@@ -37,6 +37,9 @@ func TailZeroLogFile() {
 		case <-ticker.C:
 			stat, err := os.Stat(fname)
 			start := stat.Size() - 20480
+			if start < 0 {
+				start = stat.Size()
+			}
 			_, err = file.ReadAt(buf, start)
 			if err == nil {
 				jsonArray := strings.Split(fmt.Sprintf("%s\n", buf), "{\"level\":")

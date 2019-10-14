@@ -42,7 +42,9 @@ func TailZeroLogFile() {
 				jsonArray := strings.Split(fmt.Sprintf("%s\n", buf), "{\"level\":")
 				for i := 0; i < len(jsonArray); i++ {
 					if strings.Contains(jsonArray[i], "Signers") {
-						json.Unmarshal([]byte("{\"level\":"+jsonArray[i]), &data.BlockData)
+						var temp map[string]interface{}
+						json.Unmarshal([]byte("{\"level\":"+jsonArray[i]), &temp)
+						data.BlockData = temp
 					}
 					if strings.Contains(jsonArray[i], "\"message\":\"[") {
 						var temp map[string]interface{}

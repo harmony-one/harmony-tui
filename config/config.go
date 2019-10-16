@@ -12,6 +12,7 @@ var (
 	HarmonyPath         = "./"
 	BlockchainInterval  = 3000 * time.Millisecond
 	SystemStatsInterval = 500 * time.Millisecond
+	WidgetInterval      = 1000 * time.Millisecond
 )
 
 func SetConfig(env string) {

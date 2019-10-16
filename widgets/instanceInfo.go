@@ -12,6 +12,7 @@ import (
 	"github.com/harmony-one/harmony-tui/src"
 
 	"github.com/hpcloud/tail"
+	"github.com/jinzhu/now"
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/widgets/text"
 )
@@ -35,8 +36,15 @@ func InstanceInfo() *text.Text {
 			panic(err)
 		}
 
-		if err := wrapped.Write(" ShardID: " + strconv.FormatFloat(data.ShardID, 'f', 0, 64) + "\n"); err != nil {
+		if err := wrapped.Write(" ShardID    : " + strconv.FormatFloat(data.ShardID, 'f', 0, 64) + "\n"); err != nil {
 			panic(err)
+		}
+
+		if data.Bingo != "" {
+			t, _ := now.Parse(data.Bingo)
+			if err := wrapped.Write(" Bingo      : " + time.Since(t).Round(time.Second).String() + " ago\n"); err != nil {
+				panic(err)
+			}
 		}
 
 		if err := wrapped.Write("\n " + data.Balance); err != nil {
@@ -124,19 +132,19 @@ func BlockInfo() *text.Text {
 				panic(err)
 			}
 		} else {
-			if blockEpoch := data.BlockData["blockEpoch"]; blockEpoch!=nil{
+			if blockEpoch := data.BlockData["blockEpoch"]; blockEpoch != nil {
 				if err := widget.Write("\n BlockEpoch: " + strconv.FormatFloat(blockEpoch.(float64), 'f', 0, 64)); err != nil {
 					panic(err)
 				}
 			}
 
-			if numAccounts := data.BlockData["NumAccounts"]; numAccounts!=nil{
+			if numAccounts := data.BlockData["NumAccounts"]; numAccounts != nil {
 				if err := widget.Write("\n Number of signers: " + numAccounts.(string)); err != nil {
 					panic(err)
 				}
 			}
 
-			if blockShard := data.BlockData["blockShard"]; blockShard!=nil{
+			if blockShard := data.BlockData["blockShard"]; blockShard != nil {
 				if err := widget.Write("\n BlockShard: " + strconv.FormatFloat(blockShard.(float64), 'f', 0, 64)); err != nil {
 					panic(err)
 				}
@@ -165,7 +173,7 @@ func refreshLog(ctx context.Context, widget *text.Text) {
 		}
 		return
 	}
-	
+
 	t, err := tail.TailFile(fname, tail.Config{Follow: true, MustExist: false, Logger: log.New(ioutil.Discard, "", 0), Location: &tail.SeekInfo{Offset: 1, Whence: 2}})
 
 	for line := range t.Lines {
@@ -180,7 +188,7 @@ func refreshLog(ctx context.Context, widget *text.Text) {
 
 func refreshWidget(f func()) {
 
-	ticker := time.NewTicker(500 * time.Millisecond)
+	ticker := time.NewTicker(config.WidgetInterval)
 	defer ticker.Stop()
 
 	for {

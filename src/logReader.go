@@ -49,7 +49,7 @@ func TailZeroLogFile() {
 						json.Unmarshal([]byte("{\"level\":"+jsonArray[i]), &temp)
 						data.BlockData = temp
 					}
-					if strings.Contains(jsonArray[i], "\"message\":\"[") {
+					if strings.Contains(jsonArray[i], "\"message\":\"") {
 						var temp map[string]interface{}
 						json.Unmarshal([]byte("{\"level\":"+jsonArray[i]), &temp)
 						if temp == nil {
@@ -70,6 +70,8 @@ func TailZeroLogFile() {
 								data.BlockReward = time
 							case strings.Contains(message, "[OnCommitted]"):
 								data.OnCommitted = time
+							case strings.Contains(message, "HOORAY") || strings.Contains(message, "BINGO"):
+								data.Bingo = time
 							}
 						}
 					}

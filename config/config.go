@@ -13,6 +13,12 @@ var (
 	BlockchainInterval  = 3000 * time.Millisecond
 	SystemStatsInterval = 500 * time.Millisecond
 	WidgetInterval      = 1000 * time.Millisecond
+	LinechartInterval   = 5000 * time.Millisecond
+	TimestampEC2        = "2006-01-02T15:04:05.000000000Z"
+	TimestampMac        = "2006-01-02T15:04:05.000000-07:00"
+	TimestampLayout     = TimestampEC2
+	EarningRateInterval = 60 * time.Second
+	OutOfSyncTimeInMin  = 5.00
 )
 
 func SetConfig(env string) {
@@ -26,6 +32,8 @@ func SetConfig(env string) {
 
 		BlockchainInterval = 3000 * time.Millisecond
 		SystemStatsInterval = 250 * time.Millisecond
+
+		TimestampLayout = TimestampMac
 	} else if env == "ec2" {
 		LogPath = "./latest/"
 		HarmonyPath = "./"

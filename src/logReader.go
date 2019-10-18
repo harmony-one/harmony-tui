@@ -3,7 +3,8 @@ package src
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/harmony-one/harmony-tui/config"
 	"github.com/harmony-one/harmony-tui/data"
+	"github.com/hpcloud/tail"
 )
 
 var previousJSONString = ""
@@ -22,62 +24,37 @@ func TailZeroLogFile() {
 		return
 	}
 
-	ticker := time.NewTicker(config.BlockchainInterval)
-	defer ticker.Stop()
+	t, _ := tail.TailFile(fname, tail.Config{Follow: true, MustExist: false, Logger: log.New(ioutil.Discard, "", 0), Location: &tail.SeekInfo{Offset: 1, Whence: 2}})
 
-	file, err := os.Open(fname)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-	buf := make([]byte, 20480)
+	for line := range t.Lines {
+		var temp map[string]interface{}
+		json.Unmarshal([]byte(line.Text), &temp)
 
-	for {
-		select {
-		case <-ticker.C:
-			stat, err := os.Stat(fname)
-			start := stat.Size() - 20480
-			if start < 0 {
-				start = stat.Size()
-			}
-			_, err = file.ReadAt(buf, start)
-			if err == nil {
-				jsonArray := strings.Split(fmt.Sprintf("%s\n", buf), "{\"level\":")
-				for i := 0; i < len(jsonArray); i++ {
-					if strings.Contains(jsonArray[i], "Signers") {
-						var temp map[string]interface{}
-						json.Unmarshal([]byte("{\"level\":"+jsonArray[i]), &temp)
-						data.BlockData = temp
-					}
-					if strings.Contains(jsonArray[i], "\"message\":\"") {
-						var temp map[string]interface{}
-						json.Unmarshal([]byte("{\"level\":"+jsonArray[i]), &temp)
-						if temp == nil {
-							continue
-						}
-						message := temp["message"].(string)
-						if temp["time"] != nil {
+		if temp == nil {
+			continue
+		}
 
-							time := temp["time"].(string)
-							switch {
-							case strings.Contains(message, "[OnAnnounce]"):
-								data.OnAnnounce = time
-							case strings.Contains(message, "[Announce]"):
-								data.Announce = time
-							case strings.Contains(message, "[OnPrepared]"):
-								data.OnPrepared = time
-							case strings.Contains(message, "[Block Reward]"):
-								data.BlockReward = time
-							case strings.Contains(message, "[OnCommitted]"):
-								data.OnCommitted = time
-							case strings.Contains(message, "HOORAY") || strings.Contains(message, "BINGO"):
-								data.Bingo = time
-							}
-						}
-					}
-				}
-			} else {
-				panic(err)
+		if strings.Contains(line.Text, "Signers") {
+			data.BlockData = temp
+		}
+
+		if temp["time"] != nil && temp["message"] != nil {
+
+			message := temp["message"].(string)
+			time := temp["time"].(string)
+			switch {
+			case strings.Contains(message, "[OnAnnounce]"):
+				data.OnAnnounce = time
+			case strings.Contains(message, "[Announce]"):
+				data.Announce = time
+			case strings.Contains(message, "[OnPrepared]"):
+				data.OnPrepared = time
+			case strings.Contains(message, "[Block Reward]"):
+				data.BlockReward = time
+			case strings.Contains(message, "[OnCommitted]"):
+				data.OnCommitted = time
+			case strings.Contains(message, "HOORAY") || strings.Contains(message, "BINGO"):
+				data.Bingo = time
 			}
 		}
 	}

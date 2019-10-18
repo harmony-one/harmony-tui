@@ -30,6 +30,7 @@ var StateRoot string
 var PeerCount int64
 var OneAddress string
 var Balance string
+var TotalBalance float64
 var AppVersion string
 
 var Quitter func(string)
@@ -83,9 +84,12 @@ func refreshData() {
 					panic(err)
 				}
 				Balance = "Address: " + OneAddress
+				tempBal := 0.00
 				for _, b := range temp {
 					Balance += "\n Balance in Shard " + strconv.FormatFloat(b["shard"].(float64), 'f', 0, 64) + ":  " + strconv.FormatFloat(b["amount"].(float64), 'f', 4, 64)
+					tempBal += b["amount"].(float64)
 				}
+				TotalBalance = tempBal
 			}
 		}
 	}

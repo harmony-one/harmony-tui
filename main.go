@@ -77,7 +77,12 @@ func main() {
 			),
 		),
 		grid.RowHeightPerc(40,
-			grid.Widget(widgets.LogInfo(ctx), container.Border(linestyle.Round), container.BorderTitle("Validator Logs")),
+			grid.ColWidthPerc(50, 
+				grid.Widget(widgets.GetEarningRate(), container.Border(linestyle.Round), container.BorderTitle(" Earning Rate per minute ")),
+			),
+			grid.ColWidthPerc(50, 
+				grid.Widget(widgets.LogInfo(ctx), container.Border(linestyle.Round), container.BorderTitle(" Validator Logs ")),
+			),
 		),
 	)
 

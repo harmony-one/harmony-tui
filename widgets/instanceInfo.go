@@ -12,7 +12,6 @@ import (
 	"github.com/harmony-one/harmony-tui/src"
 
 	"github.com/hpcloud/tail"
-	"github.com/jinzhu/now"
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/widgets/text"
 )
@@ -41,9 +40,19 @@ func InstanceInfo() *text.Text {
 		}
 
 		if data.Bingo != "" {
-			t, _ := now.Parse(data.Bingo)
-			if err := wrapped.Write(" Bingo      : " + time.Since(t).Round(time.Second).String() + " ago\n"); err != nil {
-				panic(err)
+			t, parseErr := time.Parse(config.TimestampLayout, data.Bingo)
+			if parseErr == nil {
+				if err := wrapped.Write(" BINGO      : " + time.Since(t).Round(time.Second).String() + " ago\n"); err != nil {
+					panic(err)
+				}
+				if time.Since(t).Minutes() > config.OutOfSyncTimeInMin {
+					if err := wrapped.Write(" "); err != nil {
+						panic(err)
+					}
+					if err := wrapped.Write(" Node out of sync ", text.WriteCellOpts(cell.BgColor(cell.ColorRGB24(255,127,80)))); err != nil {
+						panic(err)
+					}
+				}
 			}
 		}
 

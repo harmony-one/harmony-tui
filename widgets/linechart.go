@@ -10,44 +10,48 @@ import (
 	"github.com/mum4k/termdash/widgets/linechart"
 )
 
-// TODO: This widget is not being used as of now. May be we can use or modify this file to get line chart
-
-
 // GetLineChart retunrs linechart of total balance in one account
 func GetLineChart() *linechart.LineChart {
 	lc, err := linechart.New(
-		linechart.AxesCellOpts(cell.FgColor(cell.ColorBlack)),
-		linechart.YLabelCellOpts(cell.FgColor(cell.ColorGreen)),
-		linechart.XLabelCellOpts(cell.FgColor(cell.ColorGreen)),
+		linechart.AxesCellOpts(cell.FgColor(cell.ColorWhite)),
+		linechart.YLabelCellOpts(cell.FgColor(cell.ColorWhite)),
+		linechart.XLabelCellOpts(cell.FgColor(cell.ColorWhite)),
 		linechart.XAxisUnscaled(),
-		linechart.YAxisAdaptive(),
+		linechart.YAxisCustomScale(0.00, 0.80),
 	)
 
 	if err != nil {
 		panic(err)
 	}
-	go playLineCharrt(lc)
+	go playLineChart(lc)
 	return lc
 }
 
-func playLineCharrt(lc *linechart.LineChart) {
-	ticker := time.NewTicker(config.LinechartInterval)
+func playLineChart(lc *linechart.LineChart) {
+	initialBalance := 0.00
+	ticker := time.NewTicker(config.EarningRateInterval)
 	defer ticker.Stop()
 	values := []float64{}
 	for {
 		select {
 		case <-ticker.C:
-			values = append(values, data.TotalBalance)
-			if len(values) > 10 {
+			if data.TotalBalance != 0 && initialBalance == 0 {
+				initialBalance = data.TotalBalance
+				continue
+			}
+			data.EarningRate = data.TotalBalance - initialBalance
+			values = append(values, data.EarningRate)
+			if len(values) > 15 {
 				values = values[1:]
 			}
 
 			lc.Series("amount", values,
-				linechart.SeriesCellOpts(cell.FgColor(cell.ColorBlue)),
+				linechart.SeriesCellOpts(cell.FgColor(cell.ColorWhite)),
 				linechart.SeriesXLabels(map[int]string{
 					0: "time",
 				}),
 			)
+			initialBalance = data.TotalBalance
 		}
 	}
 }

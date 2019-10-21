@@ -2,6 +2,7 @@ package widgets
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"strconv"
@@ -18,6 +19,7 @@ import (
 
 func InstanceInfo() *text.Text {
 
+	showEarningRate := false
 	wrapped, err := text.New(text.WrapAtRunes())
 	if err != nil {
 		panic(err)
@@ -49,7 +51,7 @@ func InstanceInfo() *text.Text {
 					if err := wrapped.Write(" "); err != nil {
 						panic(err)
 					}
-					if err := wrapped.Write(" Node out of sync ", text.WriteCellOpts(cell.BgColor(cell.ColorRGB24(255,127,80)))); err != nil {
+					if err := wrapped.Write(" Node out of sync ", text.WriteCellOpts(cell.BgColor(cell.ColorRGB24(255, 127, 80)))); err != nil {
 						panic(err)
 					}
 				}
@@ -58,6 +60,13 @@ func InstanceInfo() *text.Text {
 
 		if err := wrapped.Write("\n " + data.Balance); err != nil {
 			panic(err)
+		}
+
+		if showEarningRate || data.EarningRate != 0 {
+			showEarningRate = true
+			if err := wrapped.Write(fmt.Sprintf("\n\n Earning rate : %.4f/%.0fs", data.EarningRate, config.EarningRateInterval.Seconds())); err != nil {
+				panic(err)
+			}
 		}
 	})
 

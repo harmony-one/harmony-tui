@@ -10,6 +10,8 @@ import (
 	"github.com/mum4k/termdash/widgets/barchart"
 )
 
+// TODO: This widget is not being used as of now. May be we can use or modify this file to get bar chart
+
 const (
 	barCount = 15
 	barWidth = 5

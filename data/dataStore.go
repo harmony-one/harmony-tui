@@ -5,35 +5,38 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/harmony-one/harmony-tui/rpc"
 	"github.com/harmony-one/harmony-tui/config"
+	"github.com/harmony-one/harmony-tui/rpc"
 )
 
-var BlockData map[string]interface{}
-var VersionData map[string]interface{}
-var Announce string = ""
-var OnAnnounce string = ""
-var OnPrepared string = ""
-var BlockReward string = ""
-var Bingo string = ""
-var OnCommitted string = ""
+var (
+	BlockData   map[string]interface{}
+	VersionData map[string]interface{}
+	Announce    string
+	OnAnnounce  string
+	OnPrepared  string
+	BlockReward string
+	Bingo       string
+	OnCommitted string
 
-var BlockHash string
-var BlockNumber float64
-var ShardID float64
-var Leader string
-var ViewID float64
-var Epoch float64
-var SizeInt int64
-var NoOfTransaction int
-var StateRoot string
-var PeerCount int64
-var OneAddress string
-var Balance string
-var TotalBalance float64
-var AppVersion string
+	BlockHash       string
+	BlockNumber     float64
+	ShardID         float64
+	Leader          string
+	ViewID          float64
+	Epoch           float64
+	SizeInt         int64
+	NoOfTransaction int
+	StateRoot       string
+	PeerCount       int64
+	OneAddress      string
+	Balance         string
+	TotalBalance    float64
+	AppVersion      string
+	EarningRate     float64
 
-var Quitter func(string)
+	Quitter func(string)
+)
 
 func init() {
 	go refreshData()
@@ -105,5 +108,5 @@ func numToHex(num float64) string {
 }
 
 func SetOneAddress(addr string) {
-   OneAddress = addr
+	OneAddress = addr
 }

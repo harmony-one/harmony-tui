@@ -111,8 +111,7 @@ func initConfig() {
 		viper.SetConfigName("config-tui")
 	}
 
-	if err := viper.ReadInConfig(); err != nil {
-	}
+	viper.ReadInConfig();
 }
 
 func validateConfig() {

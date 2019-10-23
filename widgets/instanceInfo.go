@@ -194,7 +194,7 @@ func refreshLog(ctx context.Context, widget *text.Text) {
 		return
 	}
 
-	t, err := tail.TailFile(fname, tail.Config{Follow: true, MustExist: false, Logger: log.New(ioutil.Discard, "", 0), Location: &tail.SeekInfo{Offset: 1, Whence: 2}})
+	t, err := tail.TailFile(fname, tail.Config{ReOpen: true, Follow: true, MustExist: false, Logger: log.New(ioutil.Discard, "", 0), Location: &tail.SeekInfo{Offset: 1, Whence: 2}})
 
 	for line := range t.Lines {
 		if err = widget.Write(line.Text); err != nil {

@@ -12,5 +12,6 @@ require (
 	github.com/nsf/termbox-go v0.0.0-20190817171036-93860e161317 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/shirou/gopsutil v2.19.9+incompatible
+	github.com/spf13/viper v1.3.2
 	github.com/valyala/fasthttp v1.2.0
 )

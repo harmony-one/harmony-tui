@@ -20,6 +20,7 @@ import (
 	"github.com/mum4k/termdash/linestyle"
 	"github.com/mum4k/termdash/terminal/termbox"
 	"github.com/mum4k/termdash/terminal/terminalapi"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -30,14 +31,10 @@ var (
 )
 
 func main() {
-	// setting up config varibale
-	env := flag.String("env", "ec2", "environment of system binary is running on option 1- \"local\" option 2- \"ec2\"")
 	showVersion := flag.Bool("version", false, "version of the binary")
-	addr := flag.String("address", "Not Provided", "address of your one account")
-	flag.Parse()
-	config.SetConfig(*env)
 
-	data.SetOneAddress(*addr)
+	// setting up config
+	config.SetConfig()
 
 	if *showVersion {
 		fmt.Fprintf(os.Stderr,
@@ -78,7 +75,7 @@ func main() {
 		),
 		grid.RowHeightPerc(40,
 			grid.ColWidthPerc(50,
-				grid.Widget(widgets.GetLineChart(), container.Border(linestyle.Round), container.BorderTitle(fmt.Sprintf(" Earning Rate every %.0f sec ", config.EarningRateInterval.Seconds()))),
+				grid.Widget(widgets.GetLineChart(), container.Border(linestyle.Round), container.BorderTitle(fmt.Sprintf(" Earning Rate every %.0f sec ", viper.GetDuration("EarningRateInterval").Seconds()))),
 			),
 			grid.ColWidthPerc(50,
 				grid.Widget(widgets.LogInfo(ctx), container.Border(linestyle.Round), container.BorderTitle(" Validator Logs ")),

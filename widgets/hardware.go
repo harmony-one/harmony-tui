@@ -4,7 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/harmony-one/harmony-tui/config"
+	"github.com/spf13/viper"
+
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/container/grid"
 	"github.com/mum4k/termdash/linestyle"
@@ -52,7 +53,7 @@ func diskUsage() int {
 
 func refresh(ctx context.Context, gauge *gauge.Gauge, f fn) {
 
-	ticker := time.NewTicker(config.SystemStatsInterval)
+	ticker := time.NewTicker(viper.GetDuration("SystemStatsInterval"))
 	defer ticker.Stop()
 
 	for {

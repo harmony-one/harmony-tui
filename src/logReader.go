@@ -10,7 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/harmony-one/harmony-tui/config"
+	"github.com/spf13/viper"
+
 	"github.com/harmony-one/harmony-tui/data"
 	"github.com/hpcloud/tail"
 )
@@ -61,7 +62,7 @@ func TailZeroLogFile() {
 }
 
 func GetLogFilePath(prefix string) (string, error) {
-	root := config.LogPath
+	root := viper.GetString("LogPath")
 	lastModified := time.Time{}
 	var file string
 	check, err := exists(root)

@@ -59,16 +59,17 @@ func InstanceInfo() *text.Text {
 			}
 		}
 
-		if err := wrapped.Write("\n " + data.Balance); err != nil {
-			panic(err)
-		}
-
 		if showEarningRate || data.EarningRate != 0 {
 			showEarningRate = true
-			if err := wrapped.Write(fmt.Sprintf("\n\n Earning rate : %.4f/%.0fs", data.EarningRate, viper.GetDuration("EarningRateInterval").Seconds())); err != nil {
+			if err := wrapped.Write(fmt.Sprintf("\n Earning rate : %.4f/%.0fs", data.EarningRate, viper.GetDuration("EarningRateInterval").Seconds())); err != nil {
 				panic(err)
 			}
 		}
+
+		if err := wrapped.Write("\n\n " + data.Balance); err != nil {
+			panic(err)
+		}
+
 	})
 
 	return wrapped

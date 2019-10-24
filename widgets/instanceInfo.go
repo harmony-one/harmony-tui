@@ -8,7 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/harmony-one/harmony-tui/config"
+	"github.com/spf13/viper"
+
 	"github.com/harmony-one/harmony-tui/data"
 	"github.com/harmony-one/harmony-tui/src"
 
@@ -25,7 +26,7 @@ func InstanceInfo() *text.Text {
 		panic(err)
 	}
 
-	data.AppVersion, err = src.Exec_cmd(config.HarmonyPath + "./harmony -version")
+	data.AppVersion, err = src.Exec_cmd(viper.GetString("HarmonyPath") + "./harmony -version")
 	if err != nil {
 		data.AppVersion = "Error collecting data\n"
 	}
@@ -42,12 +43,12 @@ func InstanceInfo() *text.Text {
 		}
 
 		if data.Bingo != "" {
-			t, parseErr := time.Parse(config.TimestampLayout, data.Bingo)
+			t, parseErr := time.Parse(viper.GetString("TimestampLayout"), data.Bingo)
 			if parseErr == nil {
 				if err := wrapped.Write(" BINGO      : " + time.Since(t).Round(time.Second).String() + " ago\n"); err != nil {
 					panic(err)
 				}
-				if time.Since(t).Minutes() > config.OutOfSyncTimeInMin {
+				if time.Since(t).Minutes() > viper.GetFloat64("OutOfSyncTimeInMin") {
 					if err := wrapped.Write(" "); err != nil {
 						panic(err)
 					}
@@ -58,16 +59,17 @@ func InstanceInfo() *text.Text {
 			}
 		}
 
-		if err := wrapped.Write("\n " + data.Balance); err != nil {
-			panic(err)
-		}
-
 		if showEarningRate || data.EarningRate != 0 {
 			showEarningRate = true
-			if err := wrapped.Write(fmt.Sprintf("\n\n Earning rate : %.4f/%.0fs", data.EarningRate, config.EarningRateInterval.Seconds())); err != nil {
+			if err := wrapped.Write(fmt.Sprintf("\n Earning rate : %.4f/%.0fs", data.EarningRate, viper.GetDuration("EarningRateInterval").Seconds())); err != nil {
 				panic(err)
 			}
 		}
+
+		if err := wrapped.Write("\n\n " + data.Balance); err != nil {
+			panic(err)
+		}
+
 	})
 
 	return wrapped
@@ -192,7 +194,7 @@ func refreshLog(ctx context.Context, widget *text.Text) {
 		return
 	}
 
-	t, err := tail.TailFile(fname, tail.Config{Follow: true, MustExist: false, Logger: log.New(ioutil.Discard, "", 0), Location: &tail.SeekInfo{Offset: 1, Whence: 2}})
+	t, err := tail.TailFile(fname, tail.Config{ReOpen: true, Follow: true, MustExist: false, Logger: log.New(ioutil.Discard, "", 0), Location: &tail.SeekInfo{Offset: 1, Whence: 2}})
 
 	for line := range t.Lines {
 		if err = widget.Write(line.Text); err != nil {
@@ -206,7 +208,7 @@ func refreshLog(ctx context.Context, widget *text.Text) {
 
 func refreshWidget(f func()) {
 
-	ticker := time.NewTicker(config.WidgetInterval)
+	ticker := time.NewTicker(viper.GetDuration("WidgetInterval"))
 	defer ticker.Stop()
 
 	for {

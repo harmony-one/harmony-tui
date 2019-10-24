@@ -5,8 +5,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/harmony-one/harmony-tui/config"
 	"github.com/harmony-one/harmony-tui/rpc"
+
+	"github.com/spf13/viper"
 )
 
 var (
@@ -44,13 +45,13 @@ func init() {
 
 func refreshData() {
 
-	ticker := time.NewTicker(config.BlockchainInterval)
+	ticker := time.NewTicker(viper.GetDuration("RPCRefreshInterval"))
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ticker.C:
-			latestHeader, err := rpc.Request("hmy_latestHeader", config.HmyURL, []interface{}{})
+			latestHeader, err := rpc.Request("hmy_latestHeader", viper.GetString("HmyURL"), []interface{}{})
 			if err != nil {
 				return
 			}
@@ -62,13 +63,13 @@ func refreshData() {
 			Epoch, _ = latestHeader["result"].(map[string]interface{})["epoch"].(float64)
 			hexaBlockNumber := numToHex(BlockNumber)
 
-			peerCountRply, err := rpc.Request(rpc.Method.PeerCount, config.HmyURL, []interface{}{})
+			peerCountRply, err := rpc.Request(rpc.Method.PeerCount, viper.GetString("HmyURL"), []interface{}{})
 			if err != nil {
 				panic(err)
 			}
 			tempPeerCount, _ := peerCountRply["result"].(string)
 			PeerCount = hexToNum(tempPeerCount)
-			latestBlock, err := rpc.Request(rpc.Method.GetBlockByNumber, config.HmyURL, []interface{}{hexaBlockNumber, true})
+			latestBlock, err := rpc.Request(rpc.Method.GetBlockByNumber, viper.GetString("HmyURL"), []interface{}{hexaBlockNumber, true})
 			if err != nil {
 				panic(err)
 			}
@@ -77,7 +78,7 @@ func refreshData() {
 			temp, _ := latestBlock["result"].(map[string]interface{})["transactions"].([]string)
 			NoOfTransaction = len(temp)
 			StateRoot, _ = latestBlock["result"].(map[string]interface{})["stateRoot"].(string)
-			Balance, err = CheckAllShards(config.HmyURL, OneAddress, true)
+			Balance, err = CheckAllShards(viper.GetString("HmyURL"), OneAddress, true)
 			if err != nil {
 				Balance = "No data"
 			} else {

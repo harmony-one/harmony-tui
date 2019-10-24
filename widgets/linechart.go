@@ -3,7 +3,8 @@ package widgets
 import (
 	"time"
 
-	"github.com/harmony-one/harmony-tui/config"
+	"github.com/spf13/viper"
+
 	"github.com/harmony-one/harmony-tui/data"
 
 	"github.com/mum4k/termdash/cell"
@@ -29,7 +30,7 @@ func GetLineChart() *linechart.LineChart {
 
 func playLineChart(lc *linechart.LineChart) {
 	initialBalance := 0.00
-	ticker := time.NewTicker(config.EarningRateInterval)
+	ticker := time.NewTicker(viper.GetDuration("EarningRateInterval"))
 	defer ticker.Stop()
 	values := []float64{}
 	for {

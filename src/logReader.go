@@ -10,7 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/harmony-one/harmony-tui/config"
+	"github.com/spf13/viper"
+
 	"github.com/harmony-one/harmony-tui/data"
 	"github.com/hpcloud/tail"
 )
@@ -24,7 +25,7 @@ func TailZeroLogFile() {
 		return
 	}
 
-	t, _ := tail.TailFile(fname, tail.Config{Follow: true, MustExist: false, Logger: log.New(ioutil.Discard, "", 0), Location: &tail.SeekInfo{Offset: 1, Whence: 2}})
+	t, _ := tail.TailFile(fname, tail.Config{ReOpen: true, Follow: true, MustExist: false, Logger: log.New(ioutil.Discard, "", 0), Location: &tail.SeekInfo{Offset: 1, Whence: 2}})
 
 	for line := range t.Lines {
 		var temp map[string]interface{}
@@ -61,7 +62,7 @@ func TailZeroLogFile() {
 }
 
 func GetLogFilePath(prefix string) (string, error) {
-	root := config.LogPath
+	root := viper.GetString("LogPath")
 	lastModified := time.Time{}
 	var file string
 	check, err := exists(root)

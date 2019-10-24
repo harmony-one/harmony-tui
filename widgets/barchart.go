@@ -4,7 +4,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/harmony-one/harmony-tui/config"
+	"github.com/spf13/viper"
+
 	"github.com/harmony-one/harmony-tui/data"
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/widgets/barchart"
@@ -47,7 +48,7 @@ func GetEarningRate() *barchart.BarChart {
 		panic(err)
 	}
 
-	go playBarChart(bc, config.EarningRateInterval)
+	go playBarChart(bc, viper.GetDuration("EarningRateInterval"))
 
 	return bc
 }

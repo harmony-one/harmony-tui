@@ -30,7 +30,6 @@ var (
 	NoOfTransaction int
 	StateRoot       string
 	PeerCount       int64
-	OneAddress      string
 	Balance         string
 	TotalBalance    float64
 	AppVersion      string
@@ -78,7 +77,7 @@ func refreshData() {
 			temp, _ := latestBlock["result"].(map[string]interface{})["transactions"].([]string)
 			NoOfTransaction = len(temp)
 			StateRoot, _ = latestBlock["result"].(map[string]interface{})["stateRoot"].(string)
-			Balance, err = CheckAllShards(viper.GetString("HmyURL"), OneAddress, true)
+			Balance, err = CheckAllShards(viper.GetString("HmyURL"), viper.GetString("OneAddress"), true)
 			if err != nil {
 				Balance = "No data"
 			} else {
@@ -87,7 +86,7 @@ func refreshData() {
 				if err != nil {
 					panic(err)
 				}
-				Balance = "Address: " + OneAddress
+				Balance = "Address: " + viper.GetString("OneAddress")
 				tempBal := 0.00
 				for _, b := range temp {
 					Balance += "\n Balance in Shard " + strconv.FormatFloat(b["shard"].(float64), 'f', 0, 64) + ":  " + strconv.FormatFloat(b["amount"].(float64), 'f', 4, 64)
@@ -106,8 +105,4 @@ func hexToNum(hex string) int64 {
 
 func numToHex(num float64) string {
 	return "0x" + strconv.FormatInt(int64(num), 16)
-}
-
-func SetOneAddress(addr string) {
-	OneAddress = addr
 }

@@ -8,6 +8,7 @@ import (
 	"path"
 	"time"
 
+	"github.com/harmony-one/harmony-tui/alert"
 	"github.com/harmony-one/harmony-tui/config"
 	data "github.com/harmony-one/harmony-tui/data"
 	"github.com/harmony-one/harmony-tui/src"
@@ -24,17 +25,27 @@ import (
 )
 
 var (
-	version string
-	commit  string
-	builtAt string
-	builtBy string
+	version     string
+	commit      string
+	builtAt     string
+	builtBy     string
+	showVersion *bool
 )
 
-func main() {
-	showVersion := flag.Bool("version", false, "version of the binary")
+func init() {
+	showVersion = flag.Bool("version", false, "version of the binary")
 
 	// setting up config
 	config.SetConfig()
+	// start goroutine to refresh data from rpc calls
+	go data.RefreshData()
+	// start goroutine to tail the log file
+	go src.TailZeroLogFile()
+	// start goroutine for telegram alerts
+	go alert.StartTelegramAlerts()
+}
+
+func main() {
 
 	if *showVersion {
 		fmt.Fprintf(os.Stderr,
@@ -42,9 +53,6 @@ func main() {
 			path.Base(os.Args[0]), version, commit, builtBy, builtAt)
 		os.Exit(0)
 	}
-
-	// start go routine to tail the log file
-	go src.TailZeroLogFile()
 
 	t, err := termbox.New()
 	if err != nil {

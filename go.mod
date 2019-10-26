@@ -3,6 +3,8 @@ module github.com/harmony-one/harmony-tui
 go 1.12
 
 require (
+	github.com/bwmarrin/discordgo v0.20.1
+	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 	github.com/harmony-one/go-sdk v0.0.0-20191011235646-1f25a4180014
 	github.com/harmony-one/harmony v0.0.0-20191012231929-8b5a3235fd6f
 	github.com/hpcloud/tail v1.0.0
@@ -13,5 +15,6 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/shirou/gopsutil v2.19.9+incompatible
 	github.com/spf13/viper v1.3.2
+	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/valyala/fasthttp v1.2.0
 )

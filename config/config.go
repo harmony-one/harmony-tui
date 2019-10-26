@@ -1,9 +1,11 @@
 package config
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"go/build"
+	"io/ioutil"
 	"os"
 	"time"
 
@@ -11,20 +13,21 @@ import (
 )
 
 var (
-	logPath             = "./"
-	hmyURL              = "http://localhost:9500/"
-	harmonyPath         = "./"
-	rpcRefreshInterval  = 3 * time.Second
-	systemStatsInterval = 500 * time.Millisecond
-	widgetInterval      = 1000 * time.Millisecond
-	timestampEC2        = "2006-01-02T15:04:05.000000000Z"
-	timestampMac        = "2006-01-02T15:04:05.000000-07:00"
-	timestampLayout     = timestampEC2
-	earningRateInterval = 20 * time.Second
-	outOfSyncTimeInMin  = 5.00
-	env                 = "ec2"
-	oneAddress          string
-	cfgFile             string
+	logPath                 = "./"
+	hmyURL                  = "http://localhost:9500/"
+	harmonyPath             = "./"
+	rpcRefreshInterval      = 3 * time.Second
+	systemStatsInterval     = 500 * time.Millisecond
+	widgetInterval          = 1000 * time.Millisecond
+	timestampEC2            = "2006-01-02T15:04:05.000000000Z"
+	timestampMac            = "2006-01-02T15:04:05.000000-07:00"
+	timestampLayout         = timestampEC2
+	earningRateInterval     = 20 * time.Second
+	outOfSyncTimeInMin      = 5.00
+	oneAddress              string
+	cfgFile                 string
+	alertCheckIntervalInMin = 10 * time.Minute
+	diskSpaceAlertPerecent  = 90
 )
 
 func init() {
@@ -38,7 +41,9 @@ func init() {
 	viper.SetDefault("EarningRateInterval", earningRateInterval)
 	viper.SetDefault("OutOfSyncTimeInMin", outOfSyncTimeInMin)
 	viper.SetDefault("OneAddress", oneAddress)
-	viper.SetDefault("Env", env)
+	viper.SetDefault("env", "ec2")
+	viper.SetDefault("AlertCheckIntervalInMin", alertCheckIntervalInMin)
+	viper.SetDefault("DiskSpaceAlertPerecent", diskSpaceAlertPerecent)
 }
 
 func SetConfig() {
@@ -51,23 +56,28 @@ func SetConfig() {
 	binaryPath := flag.String("hmyPath", "", "path to harmony binary (default is current dir)")
 	refreshInterval := flag.String("refreshInterval", "", "Refresh interval of TUI in seconds")
 	earningInterval := flag.String("earningInterval", "", "Earning interval of TUI in seconds")
+	telegramToken := flag.String("telegramToken", "", "telegram token of your telegram bot")
 	flag.Parse()
 
-	if *env == "local" || viper.GetString("Env") == "local" {
+	initConfig()
+
+	if *env != "" {
+		viper.Set("env", env)
+	}
+
+	if viper.GetString("env") == "local" {
 		gopath := os.Getenv("GOPATH")
 		if gopath == "" {
 			gopath = build.Default.GOPATH
 		}
 
-		viper.SetDefault("LogPath", gopath+"/src/github.com/harmony-one/harmony/tmp_log/")
-		viper.SetDefault("HarmonyPath", gopath+"/src/github.com/harmony-one/harmony/bin/")
-		viper.SetDefault("TimestampLayout", timestampMac)
-	} else if *env == "ec2" || viper.GetString("Env") == "ec2" {
-		viper.SetDefault("LogPath", "./latest/")
-		viper.SetDefault("HarmonyPath", "./")
+		viper.Set("LogPath", gopath+"/src/github.com/harmony-one/harmony/tmp_log/")
+		viper.Set("HarmonyPath", gopath+"/src/github.com/harmony-one/harmony/bin/")
+		viper.Set("TimestampLayout", timestampMac)
+	} else if viper.GetString("env") == "ec2" {
+		viper.Set("LogPath", "./latest/")
+		viper.Set("HarmonyPath", "./")
 	}
-
-	initConfig()
 
 	if *log != "" {
 		viper.Set("LogPath", *log)
@@ -98,7 +108,12 @@ func SetConfig() {
 		viper.Set("OneAddress", oneAddress)
 	}
 
+	if viper.GetString("TelegramToken") == "" || *telegramToken != "" {
+		viper.Set("TelegramToken", *telegramToken)
+	}
+
 	validateConfig()
+	WriteConfig()
 }
 
 func initConfig() {
@@ -111,7 +126,7 @@ func initConfig() {
 		viper.SetConfigName("config-tui")
 	}
 
-	viper.ReadInConfig();
+	viper.ReadInConfig()
 }
 
 func validateConfig() {
@@ -135,4 +150,9 @@ func validateConfig() {
 		fmt.Println("EarningRateInterval duration should be more than 10 seconds")
 		os.Exit(1)
 	}
+}
+
+func WriteConfig() {
+	s, _ := json.Marshal(viper.AllSettings())
+	ioutil.WriteFile("config-tui.json", s, os.ModePerm)
 }

@@ -17,7 +17,7 @@ import (
 
 type fn func() int
 
-func cpuUsage() int {
+func CpuUsage() int {
 	progress, err := cpu.Percent(2000*time.Millisecond, false)
 	if err != nil {
 		panic(err)
@@ -25,7 +25,7 @@ func cpuUsage() int {
 	return int(progress[0])
 }
 
-func memoryUsage() int {
+func MemoryUsage() int {
 	usage, err := mem.VirtualMemory()
 	if err != nil {
 		panic(err)
@@ -33,7 +33,7 @@ func memoryUsage() int {
 	return int(usage.UsedPercent)
 }
 
-func diskUsage() int {
+func DiskUsage() int {
 	usage, err := disk.Usage("/")
 	if err != nil {
 		panic(err)
@@ -81,7 +81,7 @@ func CpuLoadGrid(ctx context.Context) []grid.Element {
 	if err != nil {
 		panic(err)
 	}
-	go refresh(ctx, cpuGauage, cpuUsage)
+	go refresh(ctx, cpuGauage, CpuUsage)
 
 	// create memory gauge
 	memGauge, err := gauge.New(
@@ -93,7 +93,7 @@ func CpuLoadGrid(ctx context.Context) []grid.Element {
 	if err != nil {
 		panic(err)
 	}
-	go refresh(ctx, memGauge, memoryUsage)
+	go refresh(ctx, memGauge, MemoryUsage)
 
 	// create disk gauge
 	diskGauge, err := gauge.New(
@@ -105,7 +105,7 @@ func CpuLoadGrid(ctx context.Context) []grid.Element {
 	if err != nil {
 		panic(err)
 	}
-	go refresh(ctx, diskGauge, diskUsage)
+	go refresh(ctx, diskGauge, DiskUsage)
 
 	// create grid structure
 	el1 := grid.RowHeightPerc(33, grid.Widget(cpuGauage))

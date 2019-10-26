@@ -38,12 +38,7 @@ var (
 	Quitter func(string)
 )
 
-func init() {
-	go refreshData()
-}
-
-func refreshData() {
-
+func RefreshData() {
 	ticker := time.NewTicker(viper.GetDuration("RPCRefreshInterval"))
 	defer ticker.Stop()
 

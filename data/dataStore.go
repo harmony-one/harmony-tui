@@ -45,7 +45,7 @@ func RefreshData() {
 	for {
 		select {
 		case <-ticker.C:
-			latestHeader, err := rpc.Request("hmy_latestHeader", viper.GetString("HmyURL"), []interface{}{})
+			latestHeader, err := GetLatestHeader()
 			if err != nil {
 				return
 			}
@@ -72,23 +72,7 @@ func RefreshData() {
 			temp, _ := latestBlock["result"].(map[string]interface{})["transactions"].([]string)
 			NoOfTransaction = len(temp)
 			StateRoot, _ = latestBlock["result"].(map[string]interface{})["stateRoot"].(string)
-			Balance, err = CheckAllShards(viper.GetString("HmyURL"), viper.GetString("OneAddress"), true)
-			if err != nil {
-				Balance = "No data"
-			} else {
-				var temp []map[string]interface{}
-				err := json.Unmarshal([]byte(Balance), &temp)
-				if err != nil {
-					panic(err)
-				}
-				Balance = "Address: " + viper.GetString("OneAddress")
-				tempBal := 0.00
-				for _, b := range temp {
-					Balance += "\n Balance in Shard " + strconv.FormatFloat(b["shard"].(float64), 'f', 0, 64) + ":  " + strconv.FormatFloat(b["amount"].(float64), 'f', 4, 64)
-					tempBal += b["amount"].(float64)
-				}
-				TotalBalance = tempBal
-			}
+			Balance, TotalBalance = GetBalance()
 		}
 	}
 }
@@ -100,4 +84,29 @@ func hexToNum(hex string) int64 {
 
 func numToHex(num float64) string {
 	return "0x" + strconv.FormatInt(int64(num), 16)
+}
+
+func GetLatestHeader() (map[string]interface{}, error) {
+	return rpc.Request("hmy_latestHeader", viper.GetString("HmyURL"), []interface{}{})
+}
+
+func GetBalance() (string, float64) {
+	tempBal := 0.00
+	balance, err := CheckAllShards(viper.GetString("HmyURL"), viper.GetString("OneAddress"), true)
+	if err != nil {
+		balance = "No data"
+	} else {
+		var temp []map[string]interface{}
+		err := json.Unmarshal([]byte(balance), &temp)
+		if err != nil {
+			panic(err)
+		}
+		balance = "Address: " + viper.GetString("OneAddress")
+
+		for _, b := range temp {
+			balance += "\n Balance in Shard " + strconv.FormatFloat(b["shard"].(float64), 'f', 0, 64) + ":  " + strconv.FormatFloat(b["amount"].(float64), 'f', 4, 64)
+			tempBal += b["amount"].(float64)
+		}
+	}
+	return balance, tempBal
 }

@@ -47,13 +47,43 @@ Below information is currently displayed on Harmony-TUI
 ```
   -address string
         address of your one account (default "Not Provided")
+  -config string
+        path to configuration file
+  -earningInterval string
+        Earning interval of TUI in seconds
   -env string
-        environment of system binary is running on option 1- "local" option 2- "ec2" (default "ec2")
+        environment of system binary is running on option 1- "local" option 2- "ec2"
+  -hmyPath string
+        path to harmony binary (default is current dir)
+  -hmyUrl string
+        harmony instance url
+  -logPath string
+        path to harmony log folder "latest"
+  -refreshInterval string
+        Refresh interval of TUI in seconds
+  -silent
+        run TUI/telegram bot in background
+  -telegramToken string
+        telegram token of your telegram bot
   -version
         version of the binary
 ```
 Examples
 1. Run binary - `path_to_binary/harmony-tui --address=YOUR_ONE_ADDRESS --env=local`
 2. Check version - `path_to_binary/harmony-tui --version`
+
+# Configure telegram bot
+1. [Create telegram bot](https://core.telegram.org/bots#creating-a-new-bot)
+2. Pass telegram token with TUI `./harmonu-tui --telegramToken=<Your_Token>`
+3. Optional: Run Telegram bot in background `./harmonu-tui --telegramToken=<Your_Token> --silent &`
+4. Search name of your telgram bot and type help to get list of supported commands
+
+# Configfile
+TUI dumps all the config into `./config-tui.json`.
+Commandline parms like telegramToken/OneAddress are needed to be passed only once.
+There after they are recored in config file.
+The file can be modified to change the config.
+Commandline param always have higher precendence than config file.
+
 # Sample screenshot
 ![alt text](https://raw.githubusercontent.com/harmony-one/harmony-tui/master/doc/images/tui-sample.gif?token=AEY7S2JV6DIWLODPOXCKMN25VED6W)

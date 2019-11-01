@@ -3,8 +3,6 @@ package src
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,50 +11,18 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/harmony-one/harmony-tui/data"
-	"github.com/hpcloud/tail"
 )
 
 var previousJSONString = ""
 
 func TailZeroLogFile() {
-	fname, err := GetLogFilePath("zerolog")
+	ticker := time.NewTicker(time.Second * 5)
+	defer ticker.Stop()
 
-	if err != nil {
-		return
-	}
-
-	t, _ := tail.TailFile(fname, tail.Config{ReOpen: true, Follow: true, MustExist: false, Logger: log.New(ioutil.Discard, "", 0), Location: &tail.SeekInfo{Offset: 1, Whence: 2}})
-
-	for line := range t.Lines {
-		var temp map[string]interface{}
-		json.Unmarshal([]byte(line.Text), &temp)
-
-		if temp == nil {
-			continue
-		}
-
-		if strings.Contains(line.Text, "Signers") {
-			data.BlockData = temp
-		}
-
-		if temp["time"] != nil && temp["message"] != nil {
-
-			message := temp["message"].(string)
-			time := temp["time"].(string)
-			switch {
-			case strings.Contains(message, "[OnAnnounce]"):
-				data.OnAnnounce = time
-			case strings.Contains(message, "[Announce]"):
-				data.Announce = time
-			case strings.Contains(message, "[OnPrepared]"):
-				data.OnPrepared = time
-			case strings.Contains(message, "[Block Reward]"):
-				data.BlockReward = time
-			case strings.Contains(message, "[OnCommitted]"):
-				data.OnCommitted = time
-			case strings.Contains(message, "HOORAY") || strings.Contains(message, "BINGO"):
-				data.Bingo = time
-			}
+	for {
+		select {
+		case <-ticker.C:
+			readLogs()
 		}
 	}
 }
@@ -100,4 +66,55 @@ func exists(path string) (bool, error) {
 		return false, nil
 	}
 	return true, err
+}
+
+func readLogs() {
+	fname, err := GetLogFilePath("zerolog")
+	if err != nil {
+		return
+	}
+
+	file, err := os.Open(fname)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	buf := make([]byte, 20480)
+	stat, err := os.Stat(fname)
+	start := stat.Size() - 20480
+	_, err = file.ReadAt(buf, start)
+	s := strings.Split(string(buf), "{\"level\":\"")
+	for _, line := range s {
+		var temp map[string]interface{}
+		json.Unmarshal([]byte("{\"level\":\""+line), &temp)
+
+		if temp == nil {
+			continue
+		}
+
+		if strings.Contains(line, "Signers") {
+			data.BlockData = temp
+		}
+
+		if temp["time"] != nil && temp["message"] != nil {
+
+			message := temp["message"].(string)
+			time := temp["time"].(string)
+			switch {
+			case strings.Contains(message, "[OnAnnounce]"):
+				data.OnAnnounce = time
+			case strings.Contains(message, "[Announce]"):
+				data.Announce = time
+			case strings.Contains(message, "[OnPrepared]"):
+				data.OnPrepared = time
+			case strings.Contains(message, "[Block Reward]"):
+				data.BlockReward = time
+			case strings.Contains(message, "[OnCommitted]"):
+				data.OnCommitted = time
+			case strings.Contains(message, "HOORAY") || strings.Contains(message, "BINGO"):
+				data.Bingo = time
+			}
+		}
+	}
 }

@@ -22,7 +22,7 @@ var (
 
 func StartTelegramAlerts() {
 	chatId = viper.GetInt64("TelegramChatId")
-	b, err 	:= tgbotapi.NewBotAPI(viper.GetString("TelegramToken"))
+	b, err := tgbotapi.NewBotAPI(viper.GetString("TelegramToken"))
 	if err != nil || viper.GetString("TelegramToken") == "" {
 		return
 	}
@@ -39,21 +39,30 @@ func StartTelegramAlerts() {
 			setChatId(update.Message.Chat.ID)
 		}
 
+		if update.Message.Chat.ID != viper.GetInt64("TelegramChatId") {
+			continue
+		}
+
 		switch text := strings.ToLower(update.Message.Text); {
 		case strings.Contains(text, "bingo"):
 			SendTelegramMessage("Last Bingo timestamp = " + data.Bingo)
 		case strings.Contains(text, "block"):
-			SendTelegramMessage(fmt.Sprintf("Current BlockNo : %0.f", data.BlockNumber))
+			res, _ := data.GetLatestHeader()
+			blockNo, _ := res["result"].(map[string]interface{})["blockNumber"].(float64)
+			SendTelegramMessage(fmt.Sprintf("Current BlockNo : %0.f", blockNo))
 		case strings.Contains(text, "epoch"):
-			SendTelegramMessage(fmt.Sprintf("Epoch : %0.f", data.Epoch))
+			res, _ := data.GetLatestHeader()
+			epoch, _ := res["result"].(map[string]interface{})["epoch"].(float64)
+			SendTelegramMessage(fmt.Sprintf("Epoch : %0.f", epoch))
 		case strings.Contains(text, "balance"):
-			SendTelegramMessage(data.Balance)
+			balance, _ := data.GetBalance()
+			SendTelegramMessage(balance)
 		case strings.Contains(text, "version"):
-			SendTelegramMessage(data.AppVersion)
+			SendTelegramMessage(widgets.GetAppVersion())
 		case strings.Contains(text, "shard"):
-			SendTelegramMessage(fmt.Sprintf("Shard Id : %0.f", data.ShardID))
-		case strings.Contains(text, "earning"):
-			SendTelegramMessage(fmt.Sprintf("Shard Id : %0.f", data.ShardID))
+			res, _ := data.GetLatestHeader()
+			shardID, _ := res["result"].(map[string]interface{})["shardID"].(float64)
+			SendTelegramMessage(fmt.Sprintf("Shard Id : %0.f", shardID))
 		case strings.Contains(text, "system"):
 			SendTelegramMessage(fmt.Sprintf("CPU : %d%% \nMemory : %d%% \nDisk : %d%%", widgets.CpuUsage(), widgets.MemoryUsage(), widgets.DiskUsage()))
 		case strings.Contains(text, "cpu"):
@@ -70,9 +79,11 @@ func StartTelegramAlerts() {
 			block     - Current block number
 			version   - Version of harmony binary
 			shard     - ShardId
-			earning   - Earning rate
+			balance   - Balance in one account
 			system    - Get system stats
 			`)
+		default:
+			SendTelegramMessage("Command not recognized")
 		}
 	}
 }

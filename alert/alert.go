@@ -14,7 +14,7 @@ var (
 )
 
 func StartAlerting() {
-
+	go StartTelegramAlerts()
 	ticker := time.NewTicker(viper.GetDuration("AlertCheckIntervalInMin"))
 	defer ticker.Stop()
 
@@ -31,7 +31,7 @@ func checkBingoAlert() {
 	t, parseErr := time.Parse(viper.GetString("TimestampLayout"), data.Bingo)
 
 	if parseErr == nil {
-		if time.Since(t).Seconds() > 10 {
+		if time.Since(t).Seconds() > viper.GetDuration("AlertCheckIntervalInMin").Seconds() {
 			nodeSync = false
 			SendTelegramAlert("=== Alert ===\nHarmony node out of sync\n LastBingo : " + data.Bingo + "\nOneAddress : " + viper.GetString("OneAddress"))
 		} else if nodeSync == false {

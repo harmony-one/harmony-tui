@@ -30,19 +30,23 @@ var (
 	builtAt     string
 	builtBy     string
 	showVersion *bool
+	silent      *bool
 )
 
 func init() {
 	showVersion = flag.Bool("version", false, "version of the binary")
-
+	silent = flag.Bool("silent", false, "run TUI/telegram bot in background")
 	// setting up config
 	config.SetConfig()
-	// start goroutine to refresh data from rpc calls
-	go data.RefreshData()
+
+	if !*silent {
+		// start goroutine to refresh data from rpc calls
+		go data.RefreshData()
+	}
 	// start goroutine to tail the log file
 	go src.TailZeroLogFile()
 	// start goroutine for telegram alerts
-	go alert.StartTelegramAlerts()
+	go alert.StartAlerting()
 }
 
 func main() {
@@ -51,6 +55,13 @@ func main() {
 		fmt.Fprintf(os.Stderr,
 			"Harmony (C) 2019. %v, version %v-%v (%v %v)\n",
 			path.Base(os.Args[0]), version, commit, builtBy, builtAt)
+		os.Exit(0)
+	}
+
+	if *silent {
+		for {
+			time.Sleep(time.Second * 60)
+		}
 		os.Exit(0)
 	}
 
@@ -120,7 +131,5 @@ func main() {
 		time.Sleep(3 * time.Second)
 	}
 
-	if err := termdash.Run(ctx, t, c, termdash.KeyboardSubscriber(quit)); err != nil {
-		panic(err)
-	}
+	termdash.Run(ctx, t, c, termdash.KeyboardSubscriber(quit))
 }

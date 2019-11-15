@@ -26,11 +26,7 @@ func InstanceInfo() *text.Text {
 		panic(err)
 	}
 
-	data.AppVersion, err = src.Exec_cmd(viper.GetString("HarmonyPath") + "./harmony -version")
-	if err != nil {
-		data.AppVersion = "Error collecting data\n"
-	}
-	data.AppVersion = " App version: " + data.AppVersion
+	data.AppVersion = GetAppVersion()
 
 	go refreshWidget(func() {
 		wrapped.Reset()
@@ -38,7 +34,7 @@ func InstanceInfo() *text.Text {
 			panic(err)
 		}
 
-		if err := wrapped.Write(" ShardID    : " + strconv.FormatFloat(data.ShardID, 'f', 0, 64) + "\n"); err != nil {
+		if err := wrapped.Write("\n ShardID    : " + strconv.FormatFloat(data.ShardID, 'f', 0, 64) + "\n"); err != nil {
 			panic(err)
 		}
 
@@ -195,7 +191,7 @@ func refreshLog(ctx context.Context, widget *text.Text) {
 	}
 
 	t, err := tail.TailFile(fname, tail.Config{ReOpen: true, Follow: true, MustExist: false, Logger: log.New(ioutil.Discard, "", 0), Location: &tail.SeekInfo{Offset: 1, Whence: 2}})
-
+	defer t.Cleanup()
 	for line := range t.Lines {
 		if err = widget.Write(line.Text); err != nil {
 			panic(err)
@@ -217,4 +213,13 @@ func refreshWidget(f func()) {
 			f()
 		}
 	}
+}
+
+func GetAppVersion() string {
+	appVersion, err := src.Exec_cmd(viper.GetString("HarmonyPath") + "./harmony -version")
+	if err != nil {
+		data.AppVersion = "Error collecting data"
+	}
+	appVersion = " App version: " + appVersion
+	return appVersion
 }

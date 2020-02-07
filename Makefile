@@ -1,4 +1,3 @@
-TOP:=$(realpath ..)
 GOCMD=go
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
@@ -13,7 +12,7 @@ commit := $(shell git describe --always --long --dirty)
 built_at := $(shell date +%FT%T%z)
 built_by := ${USER}@harmony.one
 
-env := GO111MODULE=on
+export GO111MODULE:=on
 
 ldflags := -X main.version=v${version} -X main.commit=${commit}
 ldflags += -X main.builtAt=${built_at} -X main.builtBy=${built_by}
@@ -22,7 +21,7 @@ all: build
 
 build: 
 		mkdir -p $(BINARY_DIR)
-		$(env) $(GOBUILD) -o $(BINARY_DIR)/$(BINARY_NAME) -v -ldflags="$(ldflags)"  main.go
+		$(GOBUILD) -o $(BINARY_DIR)/$(BINARY_NAME) -v -ldflags="$(ldflags)"  main.go
 
 clean: 
 		$(GOCLEAN)
@@ -41,7 +40,7 @@ upload:
 
 # Cross compilation
 build-linux:
-		$(env) GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_DIR)/$(BINARY_UNIX) -v -ldflags="$(ldflags)"
+		GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_DIR)/$(BINARY_UNIX) -v -ldflags="$(ldflags)"
 
 linux_static:
-	$(env) GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags="$(ldflags) -linkmode external -extldflags -static" -o $(BINARY_DIR)/$(BINARY_NAME)
+		GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags="$(ldflags) -linkmode external -extldflags -static" -o $(BINARY_DIR)/$(BINARY_NAME)

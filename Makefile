@@ -1,3 +1,4 @@
+TOP:=$(realpath ..)
 GOCMD=go
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
@@ -41,3 +42,6 @@ upload:
 # Cross compilation
 build-linux:
 		$(env) GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_DIR)/$(BINARY_UNIX) -v -ldflags="$(ldflags)"
+
+linux_static:
+	$(env) GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags="$(ldflags) -linkmode external -extldflags -static" -o $(BINARY_DIR)/$(BINARY_NAME)

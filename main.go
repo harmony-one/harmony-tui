@@ -50,6 +50,7 @@ func init() {
 }
 
 func main() {
+	os.Setenv("GODEBUG", "netdns=go")
 
 	if *showVersion {
 		fmt.Fprintf(os.Stderr,

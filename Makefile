@@ -20,8 +20,7 @@ ldflags += -X main.builtAt=${built_at} -X main.builtBy=${built_by}
 all: build
 
 build: 
-		mkdir -p $(BINARY_DIR)
-		$(GOBUILD) -o $(BINARY_DIR)/$(BINARY_NAME) -v -ldflags="$(ldflags)"  main.go
+		./scripts/build.sh
 
 clean: 
 		$(GOCLEAN)
@@ -40,7 +39,7 @@ upload:
 
 # Cross compilation
 build-linux:
-		GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_DIR)/$(BINARY_UNIX) -v -ldflags="$(ldflags)"
+	./scripts/build.sh
 
 linux_static:
-		GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags="$(ldflags) -linkmode external -extldflags -static" -o $(BINARY_DIR)/$(BINARY_NAME)
+	./scripts/build.sh true

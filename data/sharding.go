@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/harmony-one/harmony-tui/rpc"
+	"github.com/harmony-one/go-sdk/pkg/rpc"
 	"github.com/harmony-one/harmony/common/denominations"
 )
 

@@ -5,7 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/harmony-one/harmony-tui/rpc"
+	"github.com/harmony-one/go-sdk/pkg/rpc"
+	"github.com/harmony-one/go-sdk/pkg/sharding"
 
 	"github.com/spf13/viper"
 )
@@ -92,7 +93,7 @@ func GetLatestHeader() (map[string]interface{}, error) {
 
 func GetBalance() (string, float64) {
 	tempBal := 0.00
-	balance, err := CheckAllShards(viper.GetString("HmyURL"), viper.GetString("OneAddress"), true)
+	balance, err := sharding.CheckAllShards(viper.GetString("HmyURL"), viper.GetString("OneAddress"), true)
 	if err != nil {
 		balance = "No data"
 	} else {

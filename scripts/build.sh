@@ -8,6 +8,8 @@ GOARCH=amd64
 BINARY_DIR=bin
 BINARY=${BINARY_DIR}/harmony-tui
 
+source $(go env GOPATH)/src/github.com/harmony-one/harmony/scripts/setup_bls_build_flags.sh
+
 if [ "$(uname -s)" == "Darwin" ]; then
    GOOS=darwin
 fi

@@ -26,11 +26,9 @@ func InstanceInfo() *text.Text {
 		panic(err)
 	}
 
-	data.AppVersion = GetAppVersion()
-
 	go refreshWidget(func() {
 		wrapped.Reset()
-		if err := wrapped.Write(data.AppVersion+"", text.WriteCellOpts(cell.FgColor(cell.ColorGreen))); err != nil {
+		if err := wrapped.Write(" Harmony Version: " + data.AppVersion, text.WriteCellOpts(cell.FgColor(cell.ColorGreen))); err != nil {
 			panic(err)
 		}
 
@@ -86,6 +84,18 @@ func ChainInfo() *text.Text {
 			panic(err)
 		}
 
+		if err := widget.Write("\n NetworkID: " + data.NetworkID); err != nil {
+			panic(err)
+		}
+
+		if err := widget.Write("\n IsArchival: " + strconv.FormatBool(data.IsArchival)); err != nil {
+			panic(err)
+		}
+
+		if err := widget.Write("\n BLS Keys: " + fmt.Sprintf("%v", data.BLSKeys)); err != nil {
+			panic(err)
+		}
+
 		if err := widget.Write("\n Leader: " + data.Leader); err != nil {
 			panic(err)
 		}
@@ -128,7 +138,16 @@ func BlockInfo() *text.Text {
 		if err := widget.Write("\n Num transactions in block: " + strconv.Itoa(data.NoOfTransaction)); err != nil {
 			panic(err)
 		}
+		if err := widget.Write("\n Num staking transactions in block: " + strconv.Itoa(data.NoOfStakingTransaction)); err != nil {
+			panic(err)
+		}
+		if err := widget.Write("\n Num staking transactions in block: " + strconv.Itoa(data.NumKeys)); err != nil {
+			panic(err)
+		}
 		if err := widget.Write("\n BlockHash: " + data.BlockHash); err != nil {
+			panic(err)
+		}
+		if err := widget.Write("\n Block Timestamp: " + data.BlockTimestamp); err != nil {
 			panic(err)
 		}
 		if err := widget.Write("\n StateRoot: " + data.StateRoot); err != nil {
@@ -140,7 +159,7 @@ func BlockInfo() *text.Text {
 				panic(err)
 			}
 
-			if err := widget.Write("\n Number if signers: no data"); err != nil {
+			if err := widget.Write("\n Number of signers: no data"); err != nil {
 				panic(err)
 			}
 
@@ -165,6 +184,52 @@ func BlockInfo() *text.Text {
 					panic(err)
 				}
 			}
+		}
+	})
+
+	return widget
+}
+
+func ValidatorInfo() *text.Text {
+	widget, err := text.New(text.WrapAtRunes())
+	if err != nil {
+		panic(err)
+	}
+
+	go refreshWidget(func() {
+		widget.Reset()
+		if err := widget.Write(" Address: " + viper.GetString("OneAddress")); err != nil {
+			panic(err)
+		}
+		if err := widget.Write("\n Elected: " + strconv.FormatBool(data.Elected)); err != nil {
+			panic(err)
+		}
+		if err := widget.Write("\n EPOS Status: " + data.EposStatus); err != nil {
+			panic(err)
+		}
+		if err := widget.Write("\n Booted Status: " + data.BootedStatus ); err != nil {
+			panic(err)
+		}
+		if err := widget.Write("\n Total Delegation: " + data.TotalDelegation.String()); err != nil {
+			panic(err)
+		}
+		if err := widget.Write("\n Lifetime Rewards: " + data.LifetimeRewards.String()); err != nil {
+			panic(err)
+		}
+		if err := widget.Write("\n Lifetime Uptime: " + data.LifetimeAvalibility); err != nil {
+			panic(err)
+		}
+		if err := widget.Write("\n APR: " + data.APR ); err != nil {
+			panic(err)
+		}
+		if err := widget.Write(fmt.Sprintf("\n Validator Keys: %v", data.ValidatorBLSKeys)); err != nil {
+			panic(err)
+		}
+		if err := widget.Write("\n Current Uptime: " + data.CurrentAvailibility); err != nil {
+			panic(err)
+		}
+		if err := widget.Write("\n Effective Stake: " + data.EffectiveStake); err != nil {
+			panic(err)
 		}
 	})
 
@@ -218,7 +283,7 @@ func refreshWidget(f func()) {
 func GetAppVersion() string {
 	appVersion, err := src.Exec_cmd(viper.GetString("HarmonyPath") + "./harmony -version")
 	if err != nil {
-		data.AppVersion = "Error collecting data"
+		return "Error collecting data"
 	}
 	appVersion = " App version: " + appVersion
 	return appVersion

@@ -78,11 +78,14 @@ func main() {
 	// Placing widgets in grids in TUI
 	builder.Add(
 		grid.RowHeightPerc(30,
-			grid.ColWidthPerc(50,
+			grid.ColWidthPerc(30,
 				grid.Widget(widgets.ChainInfo(), container.Border(linestyle.Round), container.BorderTitle(" Harmony Blockchain ")),
 			),
-			grid.ColWidthPerc(50,
+			grid.ColWidthPerc(30,
 				grid.Widget(widgets.BlockInfo(), container.Border(linestyle.Round), container.BorderTitle(" Current Block ")),
+			),
+			grid.ColWidthPerc(40,
+				grid.Widget(widgets.ValidatorInfo(), container.Border(linestyle.Round), container.BorderTitle(" Validator ")),
 			),
 		),
 		grid.RowHeightPerc(30,

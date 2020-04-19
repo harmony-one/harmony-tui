@@ -76,7 +76,7 @@ func CpuLoadGrid(ctx context.Context) []grid.Element {
 		gauge.Height(1),
 		gauge.Border(linestyle.Light),
 		gauge.Color(cell.ColorWhite),
-		gauge.BorderTitle("CPU Usage"),
+		gauge.BorderTitle(" CPU Usage "),
 	)
 	if err != nil {
 		panic(err)
@@ -88,7 +88,7 @@ func CpuLoadGrid(ctx context.Context) []grid.Element {
 		gauge.Height(1),
 		gauge.Border(linestyle.Light),
 		gauge.Color(cell.ColorWhite),
-		gauge.BorderTitle("Memory Usage"),
+		gauge.BorderTitle(" Memory Usage "),
 	)
 	if err != nil {
 		panic(err)
@@ -100,7 +100,7 @@ func CpuLoadGrid(ctx context.Context) []grid.Element {
 		gauge.Height(1),
 		gauge.Border(linestyle.Light),
 		gauge.Color(cell.ColorWhite),
-		gauge.BorderTitle("Disk Usage"),
+		gauge.BorderTitle(" Disk Usage "),
 	)
 	if err != nil {
 		panic(err)

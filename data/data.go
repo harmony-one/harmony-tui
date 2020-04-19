@@ -2,6 +2,7 @@ package data
 
 import (
 	"encoding/json"
+	"math/big"
 	"regexp"
 	"strconv"
 	"time"
@@ -33,7 +34,7 @@ var (
 	PeerCount     int64
 	Balance       string
 	TotalBalance  float64
-	EarningRate   float64
+	EarningRate   *big.Int
 
 	Quitter func(string)
 

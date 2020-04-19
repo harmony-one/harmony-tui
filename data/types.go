@@ -42,7 +42,7 @@ type BlockByNumberReply struct {
   NumStakingTransactions int
 }
 
-// HACK: To get UnmarshalJSON to unmarshal one addresses
+// HACK: To get UnmarshalJSON to not error when unmarshalling one addresses
 type ValidatorInformationReply struct {
   Wrapper              ValidatorWrapper               `json:"validator"`
 	Performance          *types.CurrentEpochPerformance `json:"current-epoch-performance"`
@@ -60,7 +60,7 @@ type ValidatorWrapper struct {
 }
 
 type Validator struct {
-  Address              string `json:"address"`
+  Address              string   `json:"address"`
   SlotPubKeys          []string `json:"bls-public-keys"`
   LastEpochInCommittee *big.Int `json:"last-epoch-in-committee"`
   MinSelfDelegation    *big.Int `json:"min-self-delegation"`

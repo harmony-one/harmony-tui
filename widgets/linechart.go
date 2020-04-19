@@ -1,6 +1,7 @@
 package widgets
 
 import (
+	"math/big"
 	"time"
 
 	"github.com/spf13/viper"
@@ -9,6 +10,10 @@ import (
 
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/widgets/linechart"
+)
+
+var (
+	zeroInt = big.NewInt(0)
 )
 
 // GetLineChart retunrs linechart of total balance in one account
@@ -29,19 +34,20 @@ func GetLineChart() *linechart.LineChart {
 }
 
 func playLineChart(lc *linechart.LineChart) {
-	initialBalance := 0.00
+	initialRewards := big.NewInt(0)
 	ticker := time.NewTicker(viper.GetDuration("EarningRateInterval"))
 	defer ticker.Stop()
 	values := []float64{}
 	for {
 		select {
 		case <-ticker.C:
-			if data.TotalBalance != 0 && initialBalance == 0 {
-				initialBalance = data.TotalBalance
+			if data.ValidatorInfo.Lifetime.BlockReward.Cmp(zeroInt) > 0 && initialRewards.Cmp(zeroInt) == 0 {
+				initialRewards = data.ValidatorInfo.Lifetime.BlockReward
 				continue
 			}
-			data.EarningRate = data.TotalBalance - initialBalance
-			values = append(values, data.EarningRate)
+			data.EarningRate.Sub(data.ValidatorInfo.Lifetime.BlockReward, initialRewards)
+			earningRate, _ := new(big.Float).SetInt(data.EarningRate).Float64()
+			values = append(values, earningRate)
 			if len(values) > 15 {
 				values = values[1:]
 			}
@@ -52,7 +58,7 @@ func playLineChart(lc *linechart.LineChart) {
 					0: "time",
 				}),
 			)
-			initialBalance = data.TotalBalance
+			initialRewards = data.ValidatorInfo.Lifetime.BlockReward
 		}
 	}
 }

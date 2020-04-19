@@ -53,7 +53,7 @@ func InstanceInfo() *text.Text {
 			}
 		}
 
-		if showEarningRate || data.EarningRate != 0 {
+		if showEarningRate || data.EarningRate.Cmp(zeroInt) > 0 {
 			showEarningRate = true
 			if err := wrapped.Write(fmt.Sprintf("\n Earning rate : %.4f/%.0fs", data.EarningRate, viper.GetDuration("EarningRateInterval").Seconds())); err != nil {
 				panic(err)

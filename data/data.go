@@ -18,7 +18,6 @@ import (
 var (
 	BeaconChainEndpoint string
 
-	BlockData   map[string]interface{}
 	VersionData map[string]interface{}
 	Announce    string
 	OnAnnounce  string

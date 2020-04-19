@@ -93,12 +93,7 @@ func readLogs() {
 			continue
 		}
 
-		if strings.Contains(line, "Signers") {
-			data.BlockData = temp
-		}
-
 		if temp["time"] != nil && temp["message"] != nil {
-
 			message := temp["message"].(string)
 			time := temp["time"].(string)
 			switch {

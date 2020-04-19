@@ -55,7 +55,7 @@ func InstanceInfo() *text.Text {
 
 		if showEarningRate || data.EarningRate.Cmp(zeroInt) > 0 {
 			showEarningRate = true
-			if err := wrapped.Write(fmt.Sprintf("\n Earning rate : %.4f/%.0fs", data.EarningRate, viper.GetDuration("EarningRateInterval").Seconds())); err != nil {
+			if err := wrapped.Write(fmt.Sprintf("\n Earning rate : %s/%.0fs", data.EarningRate.String(), viper.GetDuration("EarningRateInterval").Seconds())); err != nil {
 				panic(err)
 			}
 		}
@@ -133,7 +133,7 @@ func BlockInfo() *text.Text {
 
 	go refreshWidget(func() {
 		widget.Reset()
-		if err := widget.Write(" BlockNumber: " + strconv.FormatFloat(data.LatestHeader.BlockNumber, 'f', 0, 64) + ", BlockSize: " + strconv.Itoa(data.LatestBlock.BlockSizeInt)); err != nil {
+		if err := widget.Write(" Block Number: " + strconv.FormatFloat(data.LatestHeader.BlockNumber, 'f', 0, 64) + ", Block Size: " + strconv.Itoa(data.LatestBlock.BlockSizeInt)); err != nil {
 			panic(err)
 		}
 		if err := widget.Write("\n Num transactions in block: " + strconv.Itoa(data.LatestBlock.NumTransactions)); err != nil {
@@ -142,46 +142,20 @@ func BlockInfo() *text.Text {
 		if err := widget.Write("\n Num staking transactions in block: " + strconv.Itoa(data.LatestBlock.NumStakingTransactions)); err != nil {
 			panic(err)
 		}
-		if err := widget.Write("\n BlockHash: " + data.LatestHeader.BlockHash); err != nil {
+		if err := widget.Write("\n Block Hash: " + data.LatestHeader.BlockHash); err != nil {
+			panic(err)
+		}
+		if err := widget.Write("\n Block Epoch: " + strconv.Itoa(data.LatestHeader.Epoch)); err != nil {
+			panic(err)
+		}
+		if err := widget.Write("\n Block Shard: " + strconv.Itoa(int(data.LatestHeader.ShardID))); err != nil {
 			panic(err)
 		}
 		if err := widget.Write("\n Block Timestamp: " + data.LatestHeader.Timestamp); err != nil {
 			panic(err)
 		}
-		if err := widget.Write("\n StateRoot: " + data.LatestBlock.StateRoot); err != nil {
+		if err := widget.Write("\n State Root: " + data.LatestBlock.StateRoot); err != nil {
 			panic(err)
-		}
-
-		if data.BlockData == nil {
-			if err := widget.Write("\n BlockEpoch: no data"); err != nil {
-				panic(err)
-			}
-
-			if err := widget.Write("\n Number of signers: no data"); err != nil {
-				panic(err)
-			}
-
-			if err := widget.Write("\n BlockShard: no data"); err != nil {
-				panic(err)
-			}
-		} else {
-			if blockEpoch := data.BlockData["blockEpoch"]; blockEpoch != nil {
-				if err := widget.Write("\n BlockEpoch: " + strconv.FormatFloat(blockEpoch.(float64), 'f', 0, 64)); err != nil {
-					panic(err)
-				}
-			}
-
-			if numAccounts := data.BlockData["NumAccounts"]; numAccounts != nil {
-				if err := widget.Write("\n Number of signers: " + numAccounts.(string)); err != nil {
-					panic(err)
-				}
-			}
-
-			if blockShard := data.BlockData["blockShard"]; blockShard != nil {
-				if err := widget.Write("\n BlockShard: " + strconv.FormatFloat(blockShard.(float64), 'f', 0, 64)); err != nil {
-					panic(err)
-				}
-			}
 		}
 	})
 

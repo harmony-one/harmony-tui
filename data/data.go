@@ -22,7 +22,6 @@ var (
 	Announce    string
 	OnAnnounce  string
 	OnPrepared  string
-	BlockReward string
 	Bingo       string
 	OnCommitted string
 

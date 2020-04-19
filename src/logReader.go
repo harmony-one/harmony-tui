@@ -108,8 +108,6 @@ func readLogs() {
 				data.Announce = time
 			case strings.Contains(message, "[OnPrepared]"):
 				data.OnPrepared = time
-			case strings.Contains(message, "[Block Reward]"):
-				data.BlockReward = time
 			case strings.Contains(message, "[OnCommitted]"):
 				data.OnCommitted = time
 			case strings.Contains(message, "HOORAY") || strings.Contains(message, "BINGO"):

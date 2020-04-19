@@ -119,9 +119,6 @@ func ChainInfo() *text.Text {
 		if err := widget.Write("\n OnCommitted : " + data.OnCommitted); err != nil {
 			panic(err)
 		}
-		if err := widget.Write("\n Block Reward: " + data.BlockReward); err != nil {
-			panic(err)
-		}
 	})
 
 	return widget
@@ -275,7 +272,7 @@ func LogInfo(ctx context.Context) *text.Text {
 
 func refreshLog(ctx context.Context, widget *text.Text) {
 
-	fname, err := src.GetLogFilePath("validator")
+	fname, err := src.GetLogFilePath("zerolog")
 	if err != nil {
 		if err = widget.Write(err.Error()); err != nil {
 			panic(err)

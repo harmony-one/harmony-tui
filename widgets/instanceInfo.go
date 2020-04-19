@@ -96,6 +96,10 @@ func ChainInfo() *text.Text {
 			panic(err)
 		}
 
+		if err := widget.Write("\n Beacon Endpoint: " + data.BeaconChainEndpoint); err != nil {
+			panic(err)
+		}
+
 		if err := widget.Write("\n Leader: " + data.LatestHeader.Leader); err != nil {
 			panic(err)
 		}

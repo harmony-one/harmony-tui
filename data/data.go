@@ -42,12 +42,15 @@ var (
 )
 
 func RefreshData() {
-	// TODO: Get API endpoint using GetShardingStructure
-	//shardStructureReply, err := rpc.Request(rpc.Method.GetShardingStructure, viper.GetString("HmyURL"), []interface{}{})
-	//if err != nil {
-  //	panic(err)
-	//}
-	//BeaconChainEndpoint, _ = shardStructureReply["results"].([]interface{})[0].(map[string]interface{})["http"].(string)
+	shardingReply, err := getShardingStructure()
+	if err != nil {
+  	panic(err)
+	}
+	for _, s := range shardingReply {
+		if s.ShardID == uint32(0) {
+			BeaconChainEndpoint = s.HTTP
+		}
+	}
 
 	ticker := time.NewTicker(viper.GetDuration("RPCRefreshInterval"))
 	defer ticker.Stop()
@@ -170,7 +173,7 @@ func getShardingStructure() ([]StructureReply, error) {
 		Result []StructureReply `json:"result"`
 	}
 
-	r, err := rpc.RawRequest(rpc.Method.PeerCount, viper.GetString("HmyURL"), []interface{}{})
+	r, err := rpc.RawRequest(rpc.Method.GetShardingStructure, viper.GetString("HmyURL"), []interface{}{})
 	if err != nil {
 		return []StructureReply{}, err
 	}
@@ -209,7 +212,8 @@ func getValidatorInformation() (ValidatorInformationReply, error) {
 
 	// TODO: Remove temp code for testing
 	//r, err := rpc.RawRequest(rpc.Method.GetValidatorInformation, "https://api.s0.os.hmny.io", []interface{}{"one1c0w53749uf70lfzdehhl0t23qdjvha0sf2ug5r"})
-	r, err := rpc.RawRequest(rpc.Method.GetValidatorInformation, "https://api.s0.os.hmny.io", []interface{}{"one1rhpfn58kvmmdmqfnw4uuzgedkvcfk7h67zsrc8"})
+	//r, err := rpc.RawRequest(rpc.Method.GetValidatorInformation, "https://api.s0.os.hmny.io", []interface{}{"one1rhpfn58kvmmdmqfnw4uuzgedkvcfk7h67zsrc8"})
+	r, err := rpc.RawRequest(rpc.Method.GetValidatorInformation, BeaconChainEndpoint, []interface{}{"one1rhpfn58kvmmdmqfnw4uuzgedkvcfk7h67zsrc8"})
 	//r, err := rpc.RawRequest(rpc.Method.GetValidatorInformation, BeaconChainEndpoint, []interface{}{viper.GetString("OneAddress")})
 	if err != nil {
 		return ValidatorInformationReply{}, err
@@ -218,7 +222,6 @@ func getValidatorInformation() (ValidatorInformationReply, error) {
 	temp := reply{}
 	err = json.Unmarshal(r, &temp)
 	if err != nil {
-		panic(err)
 		return ValidatorInformationReply{}, err
 	}
 	return temp.Result, nil

@@ -34,11 +34,11 @@ var (
 	PeerCount     int64
 	Balance       string
 	TotalBalance  float64
-	EarningRate   *big.Int
 
 	Quitter func(string)
 
 	oneAddressPattern = regexp.MustCompile("one1[0-9a-z]+")
+	EarningRate       = big.NewInt(0)
 )
 
 func RefreshData() {

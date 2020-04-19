@@ -58,7 +58,7 @@ func StartTelegramAlerts() {
 			balance, _ := data.GetBalance()
 			SendTelegramMessage(balance)
 		case strings.Contains(text, "version"):
-			SendTelegramMessage(widgets.GetAppVersion())
+			SendTelegramMessage(data.Metadata.Version)
 		case strings.Contains(text, "shard"):
 			res, _ := data.GetLatestHeader()
 			shardID, _ := res["result"].(map[string]interface{})["shardID"].(float64)

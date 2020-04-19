@@ -87,14 +87,13 @@ func RefreshData() {
 			PeerCount = hexToNum(peerCountReply)
 
 			validatorReply, err := getValidatorInformation()
-			if err != nil {
-				// TODO: This can fail because of the endpoint going down
-				panic(err)
+			// Possible to get bad response due to rate limiting on endpoint or endpoint going down
+			if err == nil {
+				ValidatorInfo = validatorReply
+				lifetimeSigned := numeric.NewDecFromBigInt(ValidatorInfo.Lifetime.Signing.NumBlocksSigned)
+				lifetimeToSign := numeric.NewDecFromBigInt(ValidatorInfo.Lifetime.Signing.NumBlocksToSign)
+				LifetimeAvail = lifetimeSigned.Quo(lifetimeToSign).String()
 			}
-			ValidatorInfo = validatorReply
-			lifetimeSigned := numeric.NewDecFromBigInt(ValidatorInfo.Lifetime.Signing.NumBlocksSigned)
-			lifetimeToSign := numeric.NewDecFromBigInt(ValidatorInfo.Lifetime.Signing.NumBlocksToSign)
-			LifetimeAvail = lifetimeSigned.Quo(lifetimeToSign).String()
 
 			Balance, TotalBalance = GetBalance()
 		}
@@ -213,8 +212,8 @@ func getValidatorInformation() (ValidatorInformationReply, error) {
 	// TODO: Remove temp code for testing
 	//r, err := rpc.RawRequest(rpc.Method.GetValidatorInformation, "https://api.s0.os.hmny.io", []interface{}{"one1c0w53749uf70lfzdehhl0t23qdjvha0sf2ug5r"})
 	//r, err := rpc.RawRequest(rpc.Method.GetValidatorInformation, "https://api.s0.os.hmny.io", []interface{}{"one1rhpfn58kvmmdmqfnw4uuzgedkvcfk7h67zsrc8"})
-	r, err := rpc.RawRequest(rpc.Method.GetValidatorInformation, BeaconChainEndpoint, []interface{}{"one1rhpfn58kvmmdmqfnw4uuzgedkvcfk7h67zsrc8"})
-	//r, err := rpc.RawRequest(rpc.Method.GetValidatorInformation, BeaconChainEndpoint, []interface{}{viper.GetString("OneAddress")})
+	//r, err := rpc.RawRequest(rpc.Method.GetValidatorInformation, BeaconChainEndpoint, []interface{}{"one1rhpfn58kvmmdmqfnw4uuzgedkvcfk7h67zsrc8"})
+	r, err := rpc.RawRequest(rpc.Method.GetValidatorInformation, BeaconChainEndpoint, []interface{}{viper.GetString("OneAddress")})
 	if err != nil {
 		return ValidatorInformationReply{}, err
 	}

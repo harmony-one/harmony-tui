@@ -10,12 +10,20 @@ import (
 
 	"github.com/spf13/viper"
 
+	"github.com/harmony-one/harmony/common/denominations"
+	"github.com/harmony-one/harmony/numeric"
+
 	"github.com/harmony-one/harmony-tui/data"
 	"github.com/harmony-one/harmony-tui/src"
 
 	"github.com/hpcloud/tail"
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/widgets/text"
+)
+
+var (
+	oneAsDec   = numeric.NewDec(denominations.One)
+	PercentDec = numeric.NewDec(100)
 )
 
 func InstanceInfo() *text.Text {
@@ -188,17 +196,22 @@ func ValidatorInfo() *text.Text {
 				panic(err)
 			}
 		}
-		if err := widget.Write("\n Total Delegation: " + data.ValidatorInfo.TotalDelegated.String()); err != nil {
+
+		totalDelegationAsOne := numeric.NewDecFromBigInt(data.ValidatorInfo.TotalDelegated).Quo(oneAsDec)
+		if err := widget.Write("\n Total Delegation: " + totalDelegationAsOne.String()); err != nil {
 			panic(err)
 		}
+
 		if lifetime := data.ValidatorInfo.Lifetime; lifetime != nil {
-			if err := widget.Write("\n Lifetime Rewards: " + lifetime.BlockReward.String()); err != nil {
+			lifetimeRewardAsOne := numeric.NewDecFromBigInt(lifetime.BlockReward).Quo(oneAsDec)
+			if err := widget.Write("\n Lifetime Rewards: " + lifetimeRewardAsOne.String()); err != nil {
 				panic(err)
 			}
-			if err := widget.Write("\n Lifetime Uptime: " + data.LifetimeAvail); err != nil {
+			if err := widget.Write("\n Lifetime Uptime: " + data.LifetimeAvail.Mul(PercentDec).TruncateDec().String()); err != nil {
 				panic(err)
 			}
-			if err := widget.Write("\n APR: " + lifetime.APR.String()); err != nil {
+
+			if err := widget.Write("\n APR: " + lifetime.APR.TruncateDec().String() + "%"); err != nil {
 				panic(err)
 			}
 		} else {
@@ -213,7 +226,7 @@ func ValidatorInfo() *text.Text {
 			}
 		}
 		if performance := data.ValidatorInfo.Performance; performance != nil {
-			if err := widget.Write("\n Current Uptime: " + performance.CurrentSigningPercentage.Percentage.String()); err != nil {
+			if err := widget.Write("\n Current Uptime: " + performance.CurrentSigningPercentage.Percentage.Mul(PercentDec).TruncateDec().String()); err != nil {
 				panic(err)
 			}
 		} else {
@@ -222,7 +235,7 @@ func ValidatorInfo() *text.Text {
 			}
 		}
 		if winningStake := data.ValidatorInfo.EPoSWinningStake; winningStake != nil {
-			if err := widget.Write("\n Effective Stake: " + data.ValidatorInfo.EPoSWinningStake.TruncateInt().String()); err != nil {
+			if err := widget.Write("\n Effective Stake: " + winningStake.Quo(oneAsDec).String()); err != nil {
 				panic(err)
 			}
 		} else {

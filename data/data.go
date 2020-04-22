@@ -10,7 +10,6 @@ import (
 	"github.com/harmony-one/go-sdk/pkg/rpc"
 	"github.com/harmony-one/go-sdk/pkg/sharding"
 	"github.com/harmony-one/harmony/numeric"
-	//"github.com/harmony-one/harmony/staking/types"
 
 	"github.com/spf13/viper"
 )
@@ -29,7 +28,7 @@ var (
 	LatestBlock   BlockByNumberReply
 	Metadata      NodeMetadataReply
 	ValidatorInfo ValidatorInformationReply
-	LifetimeAvail string
+	LifetimeAvail numeric.Dec
 	PeerCount     int64
 	Balance       string
 	TotalBalance  float64
@@ -91,7 +90,7 @@ func RefreshData() {
 				ValidatorInfo = validatorReply
 				lifetimeSigned := numeric.NewDecFromBigInt(ValidatorInfo.Lifetime.Signing.NumBlocksSigned)
 				lifetimeToSign := numeric.NewDecFromBigInt(ValidatorInfo.Lifetime.Signing.NumBlocksToSign)
-				LifetimeAvail = lifetimeSigned.Quo(lifetimeToSign).String()
+				LifetimeAvail = lifetimeSigned.Quo(lifetimeToSign)
 			}
 
 			Balance, TotalBalance = GetBalance()

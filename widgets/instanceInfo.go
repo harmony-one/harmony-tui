@@ -36,41 +36,26 @@ func InstanceInfo() *text.Text {
 
 	go refreshWidget(func() {
 		wrapped.Reset()
-		if err := wrapped.Write(" Harmony Version: " + data.Metadata.Version, text.WriteCellOpts(cell.FgColor(cell.ColorGreen))); err != nil {
-			panic(err)
-		}
-
-		if err := wrapped.Write("\n ShardID    : " + strconv.FormatFloat(data.Metadata.ShardID, 'f', 0, 64) + "\n"); err != nil {
-			panic(err)
-		}
+		wrapped.Write(" Harmony Version: " + data.Metadata.Version, text.WriteCellOpts(cell.FgColor(cell.ColorGreen)))
+		wrapped.Write("\n ShardID    : " + strconv.FormatFloat(data.Metadata.ShardID, 'f', 0, 64) + "\n")
 
 		if data.Bingo != "" {
 			t, parseErr := time.Parse(viper.GetString("TimestampLayout"), data.Bingo)
 			if parseErr == nil {
-				if err := wrapped.Write(" BINGO      : " + time.Since(t).Round(time.Second).String() + " ago\n"); err != nil {
-					panic(err)
-				}
+				wrapped.Write(" BINGO      : " + time.Since(t).Round(time.Second).String() + " ago\n")
 				if time.Since(t).Minutes() > viper.GetFloat64("OutOfSyncTimeInMin") {
-					if err := wrapped.Write(" "); err != nil {
-						panic(err)
-					}
-					if err := wrapped.Write(" Node out of sync ", text.WriteCellOpts(cell.BgColor(cell.ColorRGB24(255, 127, 80)))); err != nil {
-						panic(err)
-					}
+					wrapped.Write(" ")
+					wrapped.Write(" Node out of sync ", text.WriteCellOpts(cell.BgColor(cell.ColorRGB24(255, 127, 80))))
 				}
 			}
 		}
 
 		if showEarningRate || data.EarningRate.Cmp(zeroInt) > 0 {
 			showEarningRate = true
-			if err := wrapped.Write(fmt.Sprintf("\n Earning rate : %s/%.0fs", data.EarningRate.String(), viper.GetDuration("EarningRateInterval").Seconds())); err != nil {
-				panic(err)
-			}
+		  wrapped.Write(fmt.Sprintf("\n Earning rate : %s/%.0fs", data.EarningRate.String(), viper.GetDuration("EarningRateInterval").Seconds()))
 		}
 
-		if err := wrapped.Write("\n\n " + data.Balance); err != nil {
-			panic(err)
-		}
+		wrapped.Write("\n\n " + data.Balance)
 
 	})
 
@@ -88,45 +73,18 @@ func ChainInfo() *text.Text {
 
 		widget.Reset()
 
-		if err := widget.Write(" This node is connected to " + strconv.Itoa(int(data.PeerCount)) + " peers"); err != nil {
-			panic(err)
-		}
+		widget.Write(" This node is connected to " + strconv.Itoa(int(data.PeerCount)) + " peers")
+		widget.Write("\n NetworkID: " + data.Metadata.NetworkType)
+		widget.Write("\n IsArchival: " + strconv.FormatBool(data.Metadata.ArchivalNode))
+		widget.Write("\n BLS Keys: " + fmt.Sprintf("%v", data.Metadata.BLSKeys))
+		widget.Write("\n Beacon Endpoint: " + data.BeaconChainEndpoint)
+		widget.Write("\n Leader: " + data.LatestHeader.Leader)
+		widget.Write("\n Epoch: " + strconv.Itoa(data.LatestHeader.Epoch))
 
-		if err := widget.Write("\n NetworkID: " + data.Metadata.NetworkType); err != nil {
-			panic(err)
-		}
-
-		if err := widget.Write("\n IsArchival: " + strconv.FormatBool(data.Metadata.ArchivalNode)); err != nil {
-			panic(err)
-		}
-
-		if err := widget.Write("\n BLS Keys: " + fmt.Sprintf("%v", data.Metadata.BLSKeys)); err != nil {
-			panic(err)
-		}
-
-		if err := widget.Write("\n Beacon Endpoint: " + data.BeaconChainEndpoint); err != nil {
-			panic(err)
-		}
-
-		if err := widget.Write("\n Leader: " + data.LatestHeader.Leader); err != nil {
-			panic(err)
-		}
-
-		if err := widget.Write("\n Epoch: " + strconv.Itoa(data.LatestHeader.Epoch)); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n\n Announce    : " + data.Announce); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n OnAnnounce  : " + data.OnAnnounce); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n OnPrepared  : " + data.OnPrepared); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n OnCommitted : " + data.OnCommitted); err != nil {
-			panic(err)
-		}
+		widget.Write("\n\n Announce    : " + data.Announce)
+		widget.Write("\n OnAnnounce  : " + data.OnAnnounce)
+		widget.Write("\n OnPrepared  : " + data.OnPrepared)
+		widget.Write("\n OnCommitted : " + data.OnCommitted)
 	})
 
 	return widget
@@ -141,30 +99,15 @@ func BlockInfo() *text.Text {
 
 	go refreshWidget(func() {
 		widget.Reset()
-		if err := widget.Write(" Block Number: " + strconv.FormatFloat(data.LatestHeader.BlockNumber, 'f', 0, 64) + ", Block Size: " + strconv.Itoa(data.LatestBlock.BlockSizeInt)); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n Num transactions in block: " + strconv.Itoa(data.LatestBlock.NumTransactions)); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n Num staking transactions in block: " + strconv.Itoa(data.LatestBlock.NumStakingTransactions)); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n Block Hash: " + data.LatestHeader.BlockHash); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n Block Epoch: " + strconv.Itoa(data.LatestHeader.Epoch)); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n Block Shard: " + strconv.Itoa(int(data.LatestHeader.ShardID))); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n Block Timestamp: " + data.LatestHeader.Timestamp); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n State Root: " + data.LatestBlock.StateRoot); err != nil {
-			panic(err)
-		}
+		widget.Write(" Block Number: " + strconv.FormatFloat(data.LatestHeader.BlockNumber, 'f', 0, 64))
+		widget.Write("\n Block Size: " + strconv.Itoa(data.LatestBlock.BlockSizeInt))
+		widget.Write("\n Num transactions in block: " + strconv.Itoa(data.LatestBlock.NumTransactions))
+		widget.Write("\n Num staking transactions in block: " + strconv.Itoa(data.LatestBlock.NumStakingTransactions))
+		widget.Write("\n Block Hash: " + data.LatestHeader.BlockHash)
+		widget.Write("\n Block Epoch: " + strconv.Itoa(data.LatestHeader.Epoch))
+		widget.Write("\n Block Shard: " + strconv.Itoa(int(data.LatestHeader.ShardID)))
+		widget.Write("\n Block Timestamp: " + data.LatestHeader.Timestamp)
+		widget.Write("\n State Root: " + data.LatestBlock.StateRoot)
 	})
 
 	return widget
@@ -178,70 +121,37 @@ func ValidatorInfo() *text.Text {
 
 	go refreshWidget(func() {
 		widget.Reset()
-		if err := widget.Write(" Address: " + viper.GetString("OneAddress")); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n Elected: " + strconv.FormatBool(data.ValidatorInfo.CurrentlyInCommittee)); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n EPOS Status: " + data.ValidatorInfo.EPoSStatus); err != nil {
-			panic(err)
-		}
+		widget.Write(" Address: " + viper.GetString("OneAddress"))
+		widget.Write("\n Elected: " + strconv.FormatBool(data.ValidatorInfo.CurrentlyInCommittee))
+		widget.Write("\n EPOS Status: " + data.ValidatorInfo.EPoSStatus)
 		if bootedStatus := data.ValidatorInfo.BootedStatus; bootedStatus != nil {
-			if err := widget.Write("\n Booted Status: " + *bootedStatus); err != nil {
-				panic(err)
-			}
+			widget.Write("\n Booted Status: " + *bootedStatus)
 		} else {
-			if err := widget.Write("\n Booted Status: N/A"); err != nil {
-				panic(err)
-			}
+			widget.Write("\n Booted Status: N/A")
 		}
 
 		totalDelegationAsOne := numeric.NewDecFromBigInt(data.ValidatorInfo.TotalDelegated).Quo(oneAsDec)
-		if err := widget.Write("\n Total Delegation: " + totalDelegationAsOne.String()); err != nil {
-			panic(err)
-		}
+		widget.Write("\n Total Delegation: " + totalDelegationAsOne.String())
 
 		if lifetime := data.ValidatorInfo.Lifetime; lifetime != nil {
 			lifetimeRewardAsOne := numeric.NewDecFromBigInt(lifetime.BlockReward).Quo(oneAsDec)
-			if err := widget.Write("\n Lifetime Rewards: " + lifetimeRewardAsOne.String()); err != nil {
-				panic(err)
-			}
-			if err := widget.Write("\n Lifetime Uptime: " + data.LifetimeAvail.Mul(PercentDec).TruncateDec().String()); err != nil {
-				panic(err)
-			}
-
-			if err := widget.Write("\n APR: " + lifetime.APR.TruncateDec().String() + "%"); err != nil {
-				panic(err)
-			}
+			widget.Write("\n Lifetime Rewards: " + lifetimeRewardAsOne.String())
+			widget.Write("\n Lifetime Uptime: " + data.LifetimeAvail.Mul(PercentDec).TruncateDec().String())
+			widget.Write("\n APR: " + lifetime.APR.TruncateDec().String() + "%")
 		} else {
-			if err := widget.Write("\n Lifetime Rewards: N/A"); err != nil {
-				panic(err)
-			}
-			if err := widget.Write("\n Lifetime Uptime: N/A"); err != nil {
-				panic(err)
-			}
-			if err := widget.Write("\n APR: N/A"); err != nil {
-				panic(err)
-			}
+			widget.Write("\n Lifetime Rewards: N/A")
+			widget.Write("\n Lifetime Uptime: N/A")
+			widget.Write("\n APR: N/A")
 		}
 		if performance := data.ValidatorInfo.Performance; performance != nil {
-			if err := widget.Write("\n Current Uptime: " + performance.CurrentSigningPercentage.Percentage.Mul(PercentDec).TruncateDec().String()); err != nil {
-				panic(err)
-			}
+			widget.Write("\n Current Uptime: " + performance.CurrentSigningPercentage.Percentage.Mul(PercentDec).TruncateDec().String())
 		} else {
-			if err := widget.Write("\n Current Uptime: N/A"); err != nil {
-				panic(err)
-			}
+			widget.Write("\n Current Uptime: N/A")
 		}
 		if winningStake := data.ValidatorInfo.EPoSWinningStake; winningStake != nil {
-			if err := widget.Write("\n Effective Stake: " + winningStake.Quo(oneAsDec).String()); err != nil {
-				panic(err)
-			}
+			widget.Write("\n Effective Stake: " + winningStake.Quo(oneAsDec).String())
 		} else {
-			if err := widget.Write("\n Effective Stake: N/A"); err != nil {
-				panic(err)
-			}
+			widget.Write("\n Effective Stake: N/A")
 		}
 	})
 

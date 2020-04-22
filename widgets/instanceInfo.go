@@ -130,8 +130,10 @@ func ValidatorInfo() *text.Text {
 			widget.Write("\n Booted Status: N/A")
 		}
 
-		totalDelegationAsOne := numeric.NewDecFromBigInt(data.ValidatorInfo.TotalDelegated).Quo(oneAsDec)
-		widget.Write("\n Total Delegation: " + totalDelegationAsOne.String())
+		if totalDelegated := data.ValidatorInfo.TotalDelegated; totalDelegated != nil {
+			totalDelegationAsOne := numeric.NewDecFromBigInt(totalDelegated).Quo(oneAsDec)
+			widget.Write("\n Total Delegation: " + totalDelegationAsOne.String())
+		}
 
 		if lifetime := data.ValidatorInfo.Lifetime; lifetime != nil {
 			lifetimeRewardAsOne := numeric.NewDecFromBigInt(lifetime.BlockReward).Quo(oneAsDec)

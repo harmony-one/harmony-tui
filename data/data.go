@@ -2,7 +2,6 @@ package data
 
 import (
 	"encoding/json"
-	"math/big"
 	"regexp"
 	"strconv"
 	"time"
@@ -36,7 +35,7 @@ var (
 	Quitter func(string)
 
 	oneAddressPattern = regexp.MustCompile("one1[0-9a-z]+")
-	EarningRate       = big.NewInt(0)
+	EarningRate       = numeric.NewDec(0)
 )
 
 func RefreshData() {

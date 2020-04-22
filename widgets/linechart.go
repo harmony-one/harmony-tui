@@ -6,6 +6,8 @@ import (
 
 	"github.com/spf13/viper"
 
+	"github.com/harmony-one/harmony/numeric"
+
 	"github.com/harmony-one/harmony-tui/data"
 
 	"github.com/mum4k/termdash/cell"
@@ -13,7 +15,7 @@ import (
 )
 
 var (
-	zeroInt = big.NewInt(0)
+	zeroInt  = big.NewInt(0)
 )
 
 // GetLineChart retunrs linechart of total balance in one account
@@ -45,9 +47,11 @@ func playLineChart(lc *linechart.LineChart) {
 				initialRewards = data.ValidatorInfo.Lifetime.BlockReward
 				continue
 			}
-			data.EarningRate.Sub(data.ValidatorInfo.Lifetime.BlockReward, initialRewards)
-			earningRate, _ := new(big.Float).SetInt(data.EarningRate).Float64()
-			values = append(values, earningRate)
+			data.EarningRate = numeric.NewDecFromBigInt(data.ValidatorInfo.Lifetime.BlockReward).Sub(numeric.NewDecFromBigInt(initialRewards))
+			data.EarningRate = data.EarningRate.Quo(oneAsDec)
+			earningRate, _, _ := new(big.Float).Parse(data.EarningRate.String(), 10)
+			floatRate, _ := earningRate.Float64()
+			values = append(values, floatRate)
 			if len(values) > 15 {
 				values = values[1:]
 			}

@@ -57,6 +57,7 @@ func InstanceInfo() *text.Text {
 
 		wrapped.Write("\n\n " + data.Balance)
 
+		wrapped.Write("\n\nCurrent time: " + time.Now().Format("15:04:05 Jan _2 MST"))
 	})
 
 	return wrapped

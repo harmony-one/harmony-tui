@@ -8,14 +8,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/spf13/viper"
-	"github.com/harmony-one/harmony/common/denominations"
-	"github.com/harmony-one/harmony/numeric"
 	"github.com/harmony-one/harmony-tui/data"
 	"github.com/harmony-one/harmony-tui/src"
+	"github.com/harmony-one/harmony/common/denominations"
+	"github.com/harmony-one/harmony/numeric"
 	"github.com/hpcloud/tail"
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/widgets/text"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -30,7 +30,7 @@ func InstanceInfo() *text.Text {
 
 	go refreshWidget(func() {
 		wrapped.Reset()
-		wrapped.Write(" Harmony Version: " + data.Metadata.Version, text.WriteCellOpts(cell.FgColor(cell.ColorGreen)))
+		wrapped.Write(" Harmony Version: "+data.Metadata.Version, text.WriteCellOpts(cell.FgColor(cell.ColorGreen)))
 		wrapped.Write("\n ShardID    : " + strconv.FormatFloat(data.Metadata.ShardID, 'f', 0, 64) + "\n")
 
 		if data.Bingo != "" {
@@ -46,7 +46,7 @@ func InstanceInfo() *text.Text {
 
 		if showEarningRate || data.EarningRate.Cmp(zeroInt) > 0 {
 			showEarningRate = true
-		  wrapped.Write(fmt.Sprintf("\n Earning rate : %s/%.0fs", data.EarningRate.String(), viper.GetDuration("EarningRateInterval").Seconds()))
+			wrapped.Write(fmt.Sprintf("\n Earning rate : %s/%.0fs", data.EarningRate.String(), viper.GetDuration("EarningRateInterval").Seconds()))
 		}
 
 		wrapped.Write("\n\n " + data.Balance)
@@ -76,7 +76,7 @@ func ChainInfo() *text.Text {
 		widget.Write("\n OnPrepared  : " + data.OnPrepared)
 		widget.Write("\n OnCommitted : " + data.OnCommitted)
 
-		wrapped.Write("\n\n Current time: " + time.Now().Format("15:04:05 Jan _2 MST"))
+		widget.Write("\n\n Current time: " + time.Now().Format("15:04:05 Jan _2 MST"))
 	})
 
 	return widget

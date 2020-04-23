@@ -94,7 +94,6 @@ func RefreshData() {
 	}
 }
 
-
 func hexToNum(hex string) int64 {
 	rval, _ := strconv.ParseInt(hex[2:], 16, 32)
 	return rval

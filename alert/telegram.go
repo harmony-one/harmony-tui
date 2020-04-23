@@ -5,11 +5,10 @@ import (
 	"strings"
 	"time"
 
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/harmony-one/harmony-tui/config"
 	"github.com/harmony-one/harmony-tui/data"
 	"github.com/harmony-one/harmony-tui/widgets"
-
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/spf13/viper"
 )
 

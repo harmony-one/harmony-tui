@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/spf13/viper"
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/container/grid"
 	"github.com/mum4k/termdash/linestyle"
@@ -12,6 +11,7 @@ import (
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/mem"
+	"github.com/spf13/viper"
 )
 
 type fn func() int

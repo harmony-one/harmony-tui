@@ -1,14 +1,14 @@
 package data
 
 import (
-  "math/big"
+	"math/big"
 
-  "github.com/harmony-one/harmony/numeric"
-  "github.com/harmony-one/harmony/staking/types"
+	"github.com/harmony-one/harmony/numeric"
+	"github.com/harmony-one/harmony/staking/types"
 )
 
 type NodeMetadataReply struct {
-  BLSKeys      []string `json:"blskey"`
+	BLSKeys      []string `json:"blskey"`
 	Version      string   `json:"version"`
 	NetworkType  string   `json:"network"`
 	ShardID      float64  `json:"shard-id"`
@@ -30,21 +30,21 @@ type LatestHeaderReply struct {
 }
 
 type BlockByNumberReply struct {
-  BlockHash              string   `json:"hash"`
-  BlockNumber            string   `json:"number"`
-  BlockSize              string   `json:"size"`
-  BlockSizeInt           int
-  ParentHash             string   `json:"parentHash"`
-  StateRoot              string   `json:"stateRoot"`
-  Transactions           []string `json:"transactions"`
-  NumTransactions        int
-  StakingTransactions    []string `json:"stakingTransactions"`
-  NumStakingTransactions int
+	BlockHash              string `json:"hash"`
+	BlockNumber            string `json:"number"`
+	BlockSize              string `json:"size"`
+	BlockSizeInt           int
+	ParentHash             string   `json:"parentHash"`
+	StateRoot              string   `json:"stateRoot"`
+	Transactions           []string `json:"transactions"`
+	NumTransactions        int
+	StakingTransactions    []string `json:"stakingTransactions"`
+	NumStakingTransactions int
 }
 
 // HACK: To get UnmarshalJSON to not error when unmarshalling one addresses
 type ValidatorInformationReply struct {
-  Wrapper              ValidatorWrapper               `json:"validator"`
+	Wrapper              ValidatorWrapper               `json:"validator"`
 	Performance          *types.CurrentEpochPerformance `json:"current-epoch-performance"`
 	TotalDelegated       *big.Int                       `json:"total-delegation"`
 	CurrentlyInCommittee bool                           `json:"currently-in-committee"`
@@ -55,22 +55,22 @@ type ValidatorInformationReply struct {
 }
 
 type ValidatorWrapper struct {
-	Validator Validator
+	Validator   Validator
 	Delegations types.Delegations
 }
 
 type Validator struct {
-  Address              string   `json:"address"`
-  SlotPubKeys          []string `json:"bls-public-keys"`
-  LastEpochInCommittee *big.Int `json:"last-epoch-in-committee"`
-  MinSelfDelegation    *big.Int `json:"min-self-delegation"`
-  MaxTotalDelegation   *big.Int `json:"max-total-delegation"`
-  types.Commission
-  types.Description
-  CreationHeight       *big.Int `json:"creation-height"`
+	Address              string   `json:"address"`
+	SlotPubKeys          []string `json:"bls-public-keys"`
+	LastEpochInCommittee *big.Int `json:"last-epoch-in-committee"`
+	MinSelfDelegation    *big.Int `json:"min-self-delegation"`
+	MaxTotalDelegation   *big.Int `json:"max-total-delegation"`
+	types.Commission
+	types.Description
+	CreationHeight *big.Int `json:"creation-height"`
 }
 
 type StructureReply struct {
-  ShardID uint32 `json:"shardID"`
-  HTTP    string `json:"http"`
+	ShardID uint32 `json:"shardID"`
+	HTTP    string `json:"http"`
 }

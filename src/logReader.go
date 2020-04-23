@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/spf13/viper"
 	"github.com/harmony-one/harmony-tui/data"
+	"github.com/spf13/viper"
 )
 
 var previousJSONString = ""

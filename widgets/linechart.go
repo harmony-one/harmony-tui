@@ -4,15 +4,15 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/spf13/viper"
-	"github.com/harmony-one/harmony/numeric"
 	"github.com/harmony-one/harmony-tui/data"
+	"github.com/harmony-one/harmony/numeric"
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/widgets/linechart"
+	"github.com/spf13/viper"
 )
 
 var (
-	zeroInt  = big.NewInt(0)
+	zeroInt = big.NewInt(0)
 )
 
 // GetLineChart retunrs linechart of total balance in one account

@@ -66,10 +66,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	t, err := termbox.New()
-	if err != nil {
-		panic(err)
-	}
+	t, _ := termbox.New()
 
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -106,18 +103,12 @@ func main() {
 		),
 	)
 
-	gridOpts, err := builder.Build()
-	if err != nil {
-		panic(err)
-	}
+	gridOpts, _ := builder.Build()
 
-	c, err := container.New(
+	c, _ := container.New(
 		t,
 		gridOpts...,
 	)
-	if err != nil {
-		panic(err)
-	}
 
 	// logic to quite from TUI
 	quit := func(k *terminalapi.Keyboard) {

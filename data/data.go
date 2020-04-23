@@ -9,13 +9,10 @@ import (
 	"github.com/harmony-one/go-sdk/pkg/rpc"
 	"github.com/harmony-one/go-sdk/pkg/sharding"
 	"github.com/harmony-one/harmony/numeric"
-
 	"github.com/spf13/viper"
 )
 
 var (
-	BeaconChainEndpoint string
-
 	VersionData map[string]interface{}
 	Announce    string
 	OnAnnounce  string
@@ -34,68 +31,65 @@ var (
 
 	Quitter func(string)
 
-	oneAddressPattern = regexp.MustCompile("one1[0-9a-z]+")
-	EarningRate       = numeric.NewDec(0)
+	oneAddressPattern   = regexp.MustCompile("one1[0-9a-z]+")
+	EarningRate         = numeric.NewDec(0)
+	BeaconChainEndpoint = ""
 )
 
 func RefreshData() {
-	shardingReply, err := getShardingStructure()
-	if err != nil {
-  	panic(err)
-	}
-	for _, s := range shardingReply {
-		if s.ShardID == uint32(0) {
-			BeaconChainEndpoint = s.HTTP
-		}
-	}
 
-	ticker := time.NewTicker(viper.GetDuration("RPCRefreshInterval"))
-	defer ticker.Stop()
+	for range time.Tick(viper.GetDuration("RPCRefreshInterval")) {
 
-	for {
-		select {
-		case <-ticker.C:
-			latestHeader, err := getLatestHeader()
-			if err != nil {
-				return
+		// Only need to successfully get field once
+		if BeaconChainEndpoint == "" {
+			if shardingReply, err := getShardingStructure(); err == nil {
+				for _, s := range shardingReply {
+					if s.ShardID == uint32(0) {
+						BeaconChainEndpoint = s.HTTP
+						break
+					}
+				}
 			}
+		}
+
+		if latestHeader, err := getLatestHeader(); err != nil {
+			//If latestHeader fails, do not update anything
+			continue
+		} else {
 			LatestHeader = latestHeader
 			hexaBlockNumber := numToHex(LatestHeader.BlockNumber)
-
-			latestBlockReply, err := getBlockByNumber(hexaBlockNumber)
-			if err != nil {
-				panic(err)
+			// Only get block data if latest header request succeeds
+			if latestBlockReply, err := getBlockByNumber(hexaBlockNumber); err != nil {
+				LatestBlock = latestBlockReply
+			} else {
+				LatestBlock = latestBlockReply
+				LatestBlock.BlockSizeInt = int(hexToNum(LatestBlock.BlockSize))
+				LatestBlock.NumTransactions = len(LatestBlock.Transactions)
+				LatestBlock.NumStakingTransactions = len(LatestBlock.StakingTransactions)
 			}
-			LatestBlock = latestBlockReply
-			LatestBlock.BlockSizeInt = int(hexToNum(LatestBlock.BlockSize))
-			LatestBlock.NumTransactions = len(LatestBlock.Transactions)
-			LatestBlock.NumStakingTransactions = len(LatestBlock.StakingTransactions)
+		}
 
-			metadataReply, err := getNodeMetadata()
-			if err != nil {
-				panic(err)
-			}
+		if metadataReply, err := getNodeMetadata(); err == nil {
 			Metadata = metadataReply
+		}
 
-			peerCountReply, err := getPeerCount()
-			if err != nil {
-				panic(err)
-			}
+		if peerCountReply, err := getPeerCount(); err == nil {
 			PeerCount = hexToNum(peerCountReply)
+		}
 
-			validatorReply, err := getValidatorInformation()
-			// Possible to get bad response due to rate limiting on endpoint or endpoint going down
-			if err == nil {
+		Balance, TotalBalance = GetBalance()
+
+		if BeaconChainEndpoint != "" {
+			if validatorReply, err := getValidatorInformation(); err == nil {
 				ValidatorInfo = validatorReply
 				lifetimeSigned := numeric.NewDecFromBigInt(ValidatorInfo.Lifetime.Signing.NumBlocksSigned)
 				lifetimeToSign := numeric.NewDecFromBigInt(ValidatorInfo.Lifetime.Signing.NumBlocksToSign)
 				LifetimeAvail = lifetimeSigned.Quo(lifetimeToSign)
 			}
-
-			Balance, TotalBalance = GetBalance()
 		}
 	}
 }
+
 
 func hexToNum(hex string) int64 {
 	rval, _ := strconv.ParseInt(hex[2:], 16, 32)
@@ -121,8 +115,7 @@ func getLatestHeader() (LatestHeaderReply, error) {
 	}
 
 	temp := reply{}
-	err = json.Unmarshal(r, &temp)
-	if err != nil {
+	if err = json.Unmarshal(r, &temp); err != nil {
 		return LatestHeaderReply{}, err
 	}
 	return temp.Result, nil
@@ -139,8 +132,7 @@ func getBlockByNumber(hexaBlockNumber string) (BlockByNumberReply, error) {
 	}
 
 	temp := reply{}
-	err = json.Unmarshal(r, &temp)
-	if err != nil {
+	if err = json.Unmarshal(r, &temp); err != nil {
 		return BlockByNumberReply{}, err
 	}
 	return temp.Result, nil
@@ -157,8 +149,7 @@ func getPeerCount() (string, error) {
 	}
 
 	temp := reply{}
-	err = json.Unmarshal(r, &temp)
-	if err != nil {
+	if err = json.Unmarshal(r, &temp); err != nil {
 		return "", err
 	}
 	return temp.Result, nil
@@ -175,8 +166,7 @@ func getShardingStructure() ([]StructureReply, error) {
 	}
 
 	temp := reply{}
-	err = json.Unmarshal(r, &temp)
-	if err != nil {
+	if err = json.Unmarshal(r, &temp); err != nil {
 		return []StructureReply{}, err
 	}
 	return temp.Result, nil
@@ -193,8 +183,7 @@ func getNodeMetadata() (NodeMetadataReply, error) {
 	}
 
 	temp := reply{}
-	err = json.Unmarshal(r, &temp)
-	if err != nil {
+	if err = json.Unmarshal(r, &temp); err != nil {
 		return NodeMetadataReply{}, err
 	}
 	return temp.Result, nil
@@ -206,18 +195,13 @@ func getValidatorInformation() (ValidatorInformationReply, error) {
 		Result ValidatorInformationReply `json:"result"`
 	}
 
-	// TODO: Remove temp code for testing
-	//r, err := rpc.RawRequest(rpc.Method.GetValidatorInformation, "https://api.s0.os.hmny.io", []interface{}{"one1c0w53749uf70lfzdehhl0t23qdjvha0sf2ug5r"})
-	//r, err := rpc.RawRequest(rpc.Method.GetValidatorInformation, "https://api.s0.os.hmny.io", []interface{}{"one1rhpfn58kvmmdmqfnw4uuzgedkvcfk7h67zsrc8"})
-	//r, err := rpc.RawRequest(rpc.Method.GetValidatorInformation, BeaconChainEndpoint, []interface{}{"one1rhpfn58kvmmdmqfnw4uuzgedkvcfk7h67zsrc8"})
 	r, err := rpc.RawRequest(rpc.Method.GetValidatorInformation, BeaconChainEndpoint, []interface{}{viper.GetString("OneAddress")})
 	if err != nil {
 		return ValidatorInformationReply{}, err
 	}
 
 	temp := reply{}
-	err = json.Unmarshal(r, &temp)
-	if err != nil {
+	if err = json.Unmarshal(r, &temp); err != nil {
 		return ValidatorInformationReply{}, err
 	}
 	return temp.Result, nil
@@ -230,9 +214,9 @@ func GetBalance() (string, float64) {
 		balance = "No data"
 	} else {
 		var temp []map[string]interface{}
-		err := json.Unmarshal([]byte(balance), &temp)
-		if err != nil {
-			panic(err)
+		if err := json.Unmarshal([]byte(balance), &temp); err != nil {
+			balance = "No data"
+			return balance, tempBal
 		}
 		balance = "Address: " + viper.GetString("OneAddress")
 

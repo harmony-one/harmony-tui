@@ -5,11 +5,8 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
-
 	"github.com/harmony-one/harmony/numeric"
-
 	"github.com/harmony-one/harmony-tui/data"
-
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/widgets/linechart"
 )
@@ -20,17 +17,13 @@ var (
 
 // GetLineChart retunrs linechart of total balance in one account
 func GetLineChart() *linechart.LineChart {
-	lc, err := linechart.New(
+	lc, _ := linechart.New(
 		linechart.AxesCellOpts(cell.FgColor(cell.ColorWhite)),
 		linechart.YLabelCellOpts(cell.FgColor(cell.ColorWhite)),
 		linechart.XLabelCellOpts(cell.FgColor(cell.ColorWhite)),
 		linechart.XAxisUnscaled(),
 		linechart.YAxisCustomScale(0.00, 0.80),
 	)
-
-	if err != nil {
-		panic(err)
-	}
 	go playLineChart(lc)
 	return lc
 }

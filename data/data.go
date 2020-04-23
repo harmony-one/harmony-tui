@@ -2,78 +2,94 @@ package data
 
 import (
 	"encoding/json"
+	"regexp"
 	"strconv"
 	"time"
 
 	"github.com/harmony-one/go-sdk/pkg/rpc"
 	"github.com/harmony-one/go-sdk/pkg/sharding"
-
+	"github.com/harmony-one/harmony/numeric"
 	"github.com/spf13/viper"
 )
 
 var (
-	BlockData   map[string]interface{}
 	VersionData map[string]interface{}
 	Announce    string
 	OnAnnounce  string
 	OnPrepared  string
-	BlockReward string
 	Bingo       string
 	OnCommitted string
 
-	BlockHash       string
-	BlockNumber     float64
-	ShardID         float64
-	Leader          string
-	ViewID          float64
-	Epoch           float64
-	SizeInt         int64
-	NoOfTransaction int
-	StateRoot       string
-	PeerCount       int64
-	Balance         string
-	TotalBalance    float64
-	AppVersion      string
-	EarningRate     float64
+	LatestHeader  LatestHeaderReply
+	LatestBlock   BlockByNumberReply
+	Metadata      NodeMetadataReply
+	ValidatorInfo ValidatorInformationReply
+	LifetimeAvail numeric.Dec
+	PeerCount     int64
+	Balance       string
+	TotalBalance  float64
 
 	Quitter func(string)
+
+	oneAddressPattern   = regexp.MustCompile("one1[0-9a-z]+")
+	EarningRate         = numeric.NewDec(0)
+	BeaconChainEndpoint = ""
 )
 
 func RefreshData() {
-	ticker := time.NewTicker(viper.GetDuration("RPCRefreshInterval"))
-	defer ticker.Stop()
 
-	for {
-		select {
-		case <-ticker.C:
-			latestHeader, err := GetLatestHeader()
-			if err != nil {
-				return
-			}
-			BlockHash, _ = latestHeader["result"].(map[string]interface{})["blockHash"].(string)
-			BlockNumber, _ = latestHeader["result"].(map[string]interface{})["blockNumber"].(float64)
-			ShardID, _ = latestHeader["result"].(map[string]interface{})["shardID"].(float64)
-			Leader, _ = latestHeader["result"].(map[string]interface{})["leader"].(string)
-			ViewID, _ = latestHeader["result"].(map[string]interface{})["viewID"].(float64)
-			Epoch, _ = latestHeader["result"].(map[string]interface{})["epoch"].(float64)
-			hexaBlockNumber := numToHex(BlockNumber)
+	for range time.Tick(viper.GetDuration("RPCRefreshInterval")) {
 
-			peerCountRply, err := rpc.Request(rpc.Method.PeerCount, viper.GetString("HmyURL"), []interface{}{})
-			if err != nil {
-				panic(err)
+		// Only need to successfully get field once
+		if BeaconChainEndpoint == "" {
+			if shardingReply, err := getShardingStructure(); err == nil {
+				for _, s := range shardingReply {
+					if s.ShardID == uint32(0) {
+						BeaconChainEndpoint = s.HTTP
+						break
+					}
+				}
 			}
-			tempPeerCount, _ := peerCountRply["result"].(string)
-			PeerCount = hexToNum(tempPeerCount)
-			latestBlock, err := rpc.Request(rpc.Method.GetBlockByNumber, viper.GetString("HmyURL"), []interface{}{hexaBlockNumber, true})
-			if err != nil {
-				panic(err)
+		}
+
+		if latestHeader, err := getLatestHeader(); err != nil {
+			//If latestHeader fails, do not update anything
+			continue
+		} else {
+			LatestHeader = latestHeader
+			hexaBlockNumber := numToHex(LatestHeader.BlockNumber)
+			// Only get block data if latest header request succeeds
+			if latestBlockReply, err := getBlockByNumber(hexaBlockNumber); err != nil {
+				LatestBlock = latestBlockReply
+			} else {
+				LatestBlock = latestBlockReply
+				LatestBlock.BlockSizeInt = int(hexToNum(LatestBlock.BlockSize))
+				LatestBlock.NumTransactions = len(LatestBlock.Transactions)
+				LatestBlock.NumStakingTransactions = len(LatestBlock.StakingTransactions)
 			}
-			size, _ := latestBlock["result"].(map[string]interface{})["size"].(string)
-			SizeInt = hexToNum(size)
-			temp, _ := latestBlock["result"].(map[string]interface{})["transactions"].([]string)
-			NoOfTransaction = len(temp)
-			StateRoot, _ = latestBlock["result"].(map[string]interface{})["stateRoot"].(string)
-			Balance, TotalBalance = GetBalance()
+		}
+
+		if metadataReply, err := getNodeMetadata(); err == nil {
+			Metadata = metadataReply
+		}
+
+		if peerCountReply, err := getPeerCount(); err == nil {
+			PeerCount = hexToNum(peerCountReply)
+		}
+
+		Balance, TotalBalance = GetBalance()
+
+		if BeaconChainEndpoint != "" {
+			if validatorReply, err := getValidatorInformation(); err == nil {
+				ValidatorInfo = validatorReply
+				if lifetime := ValidatorInfo.Lifetime; lifetime != nil {
+					lifetimeSigned := numeric.NewDecFromBigInt(ValidatorInfo.Lifetime.Signing.NumBlocksSigned)
+					lifetimeToSign := numeric.NewDecFromBigInt(ValidatorInfo.Lifetime.Signing.NumBlocksToSign)
+					LifetimeAvail = lifetimeSigned.Quo(lifetimeToSign)
+				} else {
+					LifetimeAvail = numeric.NewDec(0)
+				}
+			}
 		}
 	}
 }
@@ -88,7 +104,110 @@ func numToHex(num float64) string {
 }
 
 func GetLatestHeader() (map[string]interface{}, error) {
-	return rpc.Request("hmy_latestHeader", viper.GetString("HmyURL"), []interface{}{})
+	return rpc.Request(rpc.Method.GetLatestBlockHeader, viper.GetString("HmyURL"), []interface{}{})
+}
+
+func getLatestHeader() (LatestHeaderReply, error) {
+	type reply struct {
+		Result LatestHeaderReply `json:"result"`
+	}
+
+	r, err := rpc.RawRequest(rpc.Method.GetLatestBlockHeader, viper.GetString("HmyURL"), []interface{}{})
+	if err != nil {
+		return LatestHeaderReply{}, err
+	}
+
+	temp := reply{}
+	if err = json.Unmarshal(r, &temp); err != nil {
+		return LatestHeaderReply{}, err
+	}
+	return temp.Result, nil
+}
+
+func getBlockByNumber(hexaBlockNumber string) (BlockByNumberReply, error) {
+	type reply struct {
+		Result BlockByNumberReply `json:"result"`
+	}
+
+	r, err := rpc.RawRequest(rpc.Method.GetBlockByNumber, viper.GetString("HmyURL"), []interface{}{hexaBlockNumber, false})
+	if err != nil {
+		return BlockByNumberReply{}, err
+	}
+
+	temp := reply{}
+	if err = json.Unmarshal(r, &temp); err != nil {
+		return BlockByNumberReply{}, err
+	}
+	return temp.Result, nil
+}
+
+func getPeerCount() (string, error) {
+	type reply struct {
+		Result string `json:"result"`
+	}
+
+	r, err := rpc.RawRequest(rpc.Method.PeerCount, viper.GetString("HmyURL"), []interface{}{})
+	if err != nil {
+		return "", err
+	}
+
+	temp := reply{}
+	if err = json.Unmarshal(r, &temp); err != nil {
+		return "", err
+	}
+	return temp.Result, nil
+}
+
+func getShardingStructure() ([]StructureReply, error) {
+	type reply struct {
+		Result []StructureReply `json:"result"`
+	}
+
+	r, err := rpc.RawRequest(rpc.Method.GetShardingStructure, viper.GetString("HmyURL"), []interface{}{})
+	if err != nil {
+		return []StructureReply{}, err
+	}
+
+	temp := reply{}
+	if err = json.Unmarshal(r, &temp); err != nil {
+		return []StructureReply{}, err
+	}
+	return temp.Result, nil
+}
+
+func getNodeMetadata() (NodeMetadataReply, error) {
+	type reply struct {
+		Result NodeMetadataReply `json:"result"`
+	}
+
+	r, err := rpc.RawRequest(rpc.Method.GetNodeMetadata, viper.GetString("HmyURL"), []interface{}{})
+	if err != nil {
+		return NodeMetadataReply{}, err
+	}
+
+	temp := reply{}
+	if err = json.Unmarshal(r, &temp); err != nil {
+		return NodeMetadataReply{}, err
+	}
+	return temp.Result, nil
+}
+
+// Always query BeaconChainEndpoint to get latest validator information on chain
+func getValidatorInformation() (ValidatorInformationReply, error) {
+	type reply struct {
+		Result ValidatorInformationReply `json:"result"`
+	}
+
+	r, err := rpc.RawRequest(rpc.Method.GetValidatorInformation, BeaconChainEndpoint, []interface{}{viper.GetString("OneAddress")})
+	if err != nil {
+		return ValidatorInformationReply{}, err
+	}
+
+	temp := reply{}
+	if err = json.Unmarshal(r, &temp); err != nil {
+		return ValidatorInformationReply{}, err
+	}
+	return temp.Result, nil
 }
 
 func GetBalance() (string, float64) {
@@ -98,9 +217,9 @@ func GetBalance() (string, float64) {
 		balance = "No data"
 	} else {
 		var temp []map[string]interface{}
-		err := json.Unmarshal([]byte(balance), &temp)
-		if err != nil {
-			panic(err)
+		if err := json.Unmarshal([]byte(balance), &temp); err != nil {
+			balance = "No data"
+			return balance, tempBal
 		}
 		balance = "Address: " + viper.GetString("OneAddress")
 

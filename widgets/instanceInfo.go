@@ -8,64 +8,48 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/spf13/viper"
-
 	"github.com/harmony-one/harmony-tui/data"
 	"github.com/harmony-one/harmony-tui/src"
-
+	"github.com/harmony-one/harmony/common/denominations"
+	"github.com/harmony-one/harmony/numeric"
 	"github.com/hpcloud/tail"
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/widgets/text"
+	"github.com/spf13/viper"
+)
+
+var (
+	oneAsDec   = numeric.NewDec(denominations.One)
+	PercentDec = numeric.NewDec(100)
 )
 
 func InstanceInfo() *text.Text {
 
 	showEarningRate := false
-	wrapped, err := text.New(text.WrapAtRunes())
-	if err != nil {
-		panic(err)
-	}
-
-	data.AppVersion = GetAppVersion()
+	wrapped, _ := text.New(text.WrapAtRunes())
 
 	go refreshWidget(func() {
 		wrapped.Reset()
-		if err := wrapped.Write(data.AppVersion+"", text.WriteCellOpts(cell.FgColor(cell.ColorGreen))); err != nil {
-			panic(err)
-		}
-
-		if err := wrapped.Write("\n ShardID    : " + strconv.FormatFloat(data.ShardID, 'f', 0, 64) + "\n"); err != nil {
-			panic(err)
-		}
+		wrapped.Write(" Harmony Version: "+data.Metadata.Version, text.WriteCellOpts(cell.FgColor(cell.ColorGreen)))
+		wrapped.Write("\n ShardID    : " + strconv.FormatFloat(data.Metadata.ShardID, 'f', 0, 64) + "\n")
 
 		if data.Bingo != "" {
 			t, parseErr := time.Parse(viper.GetString("TimestampLayout"), data.Bingo)
 			if parseErr == nil {
-				if err := wrapped.Write(" BINGO      : " + time.Since(t).Round(time.Second).String() + " ago\n"); err != nil {
-					panic(err)
-				}
+				wrapped.Write(" BINGO      : " + time.Since(t).Round(time.Second).String() + " ago\n")
 				if time.Since(t).Minutes() > viper.GetFloat64("OutOfSyncTimeInMin") {
-					if err := wrapped.Write(" "); err != nil {
-						panic(err)
-					}
-					if err := wrapped.Write(" Node out of sync ", text.WriteCellOpts(cell.BgColor(cell.ColorRGB24(255, 127, 80)))); err != nil {
-						panic(err)
-					}
+					wrapped.Write(" ")
+					wrapped.Write(" Node out of sync ", text.WriteCellOpts(cell.BgColor(cell.ColorRGB24(255, 127, 80))))
 				}
 			}
 		}
 
-		if showEarningRate || data.EarningRate != 0 {
+		if showEarningRate || data.EarningRate.Cmp(zeroInt) > 0 {
 			showEarningRate = true
-			if err := wrapped.Write(fmt.Sprintf("\n Earning rate : %.4f/%.0fs", data.EarningRate, viper.GetDuration("EarningRateInterval").Seconds())); err != nil {
-				panic(err)
-			}
+			wrapped.Write(fmt.Sprintf("\n Earning rate : %s/%.0fs", data.EarningRate.String(), viper.GetDuration("EarningRateInterval").Seconds()))
 		}
 
-		if err := wrapped.Write("\n\n " + data.Balance); err != nil {
-			panic(err)
-		}
-
+		wrapped.Write("\n\n " + data.Balance)
 	})
 
 	return wrapped
@@ -73,41 +57,26 @@ func InstanceInfo() *text.Text {
 
 func ChainInfo() *text.Text {
 
-	widget, err1 := text.New(text.WrapAtRunes())
-	if err1 != nil {
-		panic(err1)
-	}
+	widget, _ := text.New(text.WrapAtRunes())
 
 	go refreshWidget(func() {
 
 		widget.Reset()
 
-		if err := widget.Write(" This node is connected to " + strconv.Itoa(int(data.PeerCount)) + " peers"); err != nil {
-			panic(err)
-		}
+		widget.Write(" This node is connected to " + strconv.Itoa(int(data.PeerCount)) + " peers")
+		widget.Write("\n NetworkID: " + data.Metadata.NetworkType)
+		widget.Write("\n IsArchival: " + strconv.FormatBool(data.Metadata.ArchivalNode))
+		widget.Write("\n BLS Keys: " + fmt.Sprintf("%v", data.Metadata.BLSKeys))
+		widget.Write("\n Beacon Endpoint: " + data.BeaconChainEndpoint)
+		widget.Write("\n Leader: " + data.LatestHeader.Leader)
+		widget.Write("\n Epoch: " + strconv.Itoa(data.LatestHeader.Epoch))
 
-		if err := widget.Write("\n Leader: " + data.Leader); err != nil {
-			panic(err)
-		}
+		widget.Write("\n\n Announce    : " + data.Announce)
+		widget.Write("\n OnAnnounce  : " + data.OnAnnounce)
+		widget.Write("\n OnPrepared  : " + data.OnPrepared)
+		widget.Write("\n OnCommitted : " + data.OnCommitted)
 
-		if err := widget.Write("\n Epoch: " + strconv.FormatFloat(data.Epoch, 'f', 0, 64)); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n\n Announce    : " + data.Announce); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n OnAnnounce  : " + data.OnAnnounce); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n OnPrepared  : " + data.OnPrepared); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n OnCommitted : " + data.OnCommitted); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n Block Reward: " + data.BlockReward); err != nil {
-			panic(err)
-		}
+		widget.Write("\n\n Current time: " + time.Now().Format("15:04:05 Jan _2 MST"))
 	})
 
 	return widget
@@ -115,56 +84,62 @@ func ChainInfo() *text.Text {
 
 func BlockInfo() *text.Text {
 
-	widget, err1 := text.New(text.WrapAtRunes())
-	if err1 != nil {
-		panic(err1)
-	}
+	widget, _ := text.New(text.WrapAtRunes())
 
 	go refreshWidget(func() {
 		widget.Reset()
-		if err := widget.Write(" BlockNumber: " + strconv.FormatFloat(data.BlockNumber, 'f', 0, 64) + ", BlockSize: " + strconv.FormatInt(data.SizeInt, 10)); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n Num transactions in block: " + strconv.Itoa(data.NoOfTransaction)); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n BlockHash: " + data.BlockHash); err != nil {
-			panic(err)
-		}
-		if err := widget.Write("\n StateRoot: " + data.StateRoot); err != nil {
-			panic(err)
-		}
+		widget.Write(" Block Number: " + strconv.FormatFloat(data.LatestHeader.BlockNumber, 'f', 0, 64))
+		widget.Write("\n Block Size: " + strconv.Itoa(data.LatestBlock.BlockSizeInt))
+		widget.Write("\n Num transactions: " + strconv.Itoa(data.LatestBlock.NumTransactions))
+		widget.Write("\n Num staking transactions: " + strconv.Itoa(data.LatestBlock.NumStakingTransactions))
+		widget.Write("\n Block Hash: " + data.LatestHeader.BlockHash)
+		widget.Write("\n Block Epoch: " + strconv.Itoa(data.LatestHeader.Epoch))
+		widget.Write("\n Block Shard: " + strconv.Itoa(int(data.LatestHeader.ShardID)))
+		widget.Write("\n Block Timestamp: " + data.LatestHeader.Timestamp)
+		widget.Write("\n State Root: " + data.LatestBlock.StateRoot)
+	})
 
-		if data.BlockData == nil {
-			if err := widget.Write("\n BlockEpoch: no data"); err != nil {
-				panic(err)
-			}
+	return widget
+}
 
-			if err := widget.Write("\n Number if signers: no data"); err != nil {
-				panic(err)
-			}
+func ValidatorInfo() *text.Text {
+	widget, _ := text.New(text.WrapAtRunes())
 
-			if err := widget.Write("\n BlockShard: no data"); err != nil {
-				panic(err)
-			}
+	go refreshWidget(func() {
+		widget.Reset()
+		widget.Write(" Address: " + viper.GetString("OneAddress"))
+		widget.Write("\n Elected: " + strconv.FormatBool(data.ValidatorInfo.CurrentlyInCommittee))
+		widget.Write("\n EPOS Status: " + data.ValidatorInfo.EPoSStatus)
+		if bootedStatus := data.ValidatorInfo.BootedStatus; bootedStatus != nil {
+			widget.Write("\n Booted Status: " + *bootedStatus)
 		} else {
-			if blockEpoch := data.BlockData["blockEpoch"]; blockEpoch != nil {
-				if err := widget.Write("\n BlockEpoch: " + strconv.FormatFloat(blockEpoch.(float64), 'f', 0, 64)); err != nil {
-					panic(err)
-				}
-			}
+			widget.Write("\n Booted Status: N/A")
+		}
 
-			if numAccounts := data.BlockData["NumAccounts"]; numAccounts != nil {
-				if err := widget.Write("\n Number of signers: " + numAccounts.(string)); err != nil {
-					panic(err)
-				}
-			}
+		if totalDelegated := data.ValidatorInfo.TotalDelegated; totalDelegated != nil {
+			totalDelegationAsOne := numeric.NewDecFromBigInt(totalDelegated).Quo(oneAsDec)
+			widget.Write("\n Total Delegation: " + totalDelegationAsOne.String())
+		}
 
-			if blockShard := data.BlockData["blockShard"]; blockShard != nil {
-				if err := widget.Write("\n BlockShard: " + strconv.FormatFloat(blockShard.(float64), 'f', 0, 64)); err != nil {
-					panic(err)
-				}
-			}
+		if lifetime := data.ValidatorInfo.Lifetime; lifetime != nil {
+			lifetimeRewardAsOne := numeric.NewDecFromBigInt(lifetime.BlockReward).Quo(oneAsDec)
+			widget.Write("\n Lifetime Rewards: " + lifetimeRewardAsOne.String())
+			widget.Write("\n Lifetime Uptime: " + data.LifetimeAvail.Mul(PercentDec).TruncateDec().String())
+			widget.Write("\n APR: " + lifetime.APR.TruncateDec().String() + "%")
+		} else {
+			widget.Write("\n Lifetime Rewards: N/A")
+			widget.Write("\n Lifetime Uptime: N/A")
+			widget.Write("\n APR: N/A")
+		}
+		if performance := data.ValidatorInfo.Performance; performance != nil {
+			widget.Write("\n Current Uptime: " + performance.CurrentSigningPercentage.Percentage.Mul(PercentDec).TruncateDec().String())
+		} else {
+			widget.Write("\n Current Uptime: N/A")
+		}
+		if winningStake := data.ValidatorInfo.EPoSWinningStake; winningStake != nil {
+			widget.Write("\n Effective Stake: " + winningStake.Quo(oneAsDec).String())
+		} else {
+			widget.Write("\n Effective Stake: N/A")
 		}
 	})
 
@@ -172,54 +147,30 @@ func BlockInfo() *text.Text {
 }
 
 func LogInfo(ctx context.Context) *text.Text {
-	widget, err := text.New(text.RollContent(), text.WrapAtWords())
-	if err != nil {
-		panic(err)
-	}
+	widget, _ := text.New(text.RollContent(), text.WrapAtWords())
+
 	go refreshLog(ctx, widget)
 	return widget
 }
 
 func refreshLog(ctx context.Context, widget *text.Text) {
 
-	fname, err := src.GetLogFilePath("validator")
+	fname, err := src.GetLogFilePath("zerolog")
 	if err != nil {
-		if err = widget.Write(err.Error()); err != nil {
-			panic(err)
-		}
+		widget.Write(err.Error())
 		return
 	}
 
 	t, err := tail.TailFile(fname, tail.Config{ReOpen: true, Follow: true, MustExist: false, Logger: log.New(ioutil.Discard, "", 0), Location: &tail.SeekInfo{Offset: 1, Whence: 2}})
 	defer t.Cleanup()
 	for line := range t.Lines {
-		if err = widget.Write(line.Text); err != nil {
-			panic(err)
-		}
-		if err = widget.Write("\n"); err != nil {
-			panic(err)
-		}
+		widget.Write(line.Text)
+		widget.Write("\n")
 	}
 }
 
 func refreshWidget(f func()) {
-
-	ticker := time.NewTicker(viper.GetDuration("WidgetInterval"))
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ticker.C:
-			f()
-		}
+	for range time.Tick(viper.GetDuration("WidgetInterval")) {
+		f()
 	}
-}
-
-func GetAppVersion() string {
-	appVersion, err := src.Exec_cmd(viper.GetString("HarmonyPath") + "./harmony -version")
-	if err != nil {
-		data.AppVersion = "Error collecting data"
-	}
-	appVersion = " App version: " + appVersion
-	return appVersion
 }

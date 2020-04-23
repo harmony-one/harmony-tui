@@ -66,10 +66,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	t, err := termbox.New()
-	if err != nil {
-		panic(err)
-	}
+	t, _ := termbox.New()
 
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -78,11 +75,14 @@ func main() {
 	// Placing widgets in grids in TUI
 	builder.Add(
 		grid.RowHeightPerc(30,
-			grid.ColWidthPerc(50,
+			grid.ColWidthPerc(30,
 				grid.Widget(widgets.ChainInfo(), container.Border(linestyle.Round), container.BorderTitle(" Harmony Blockchain ")),
 			),
-			grid.ColWidthPerc(50,
+			grid.ColWidthPerc(30,
 				grid.Widget(widgets.BlockInfo(), container.Border(linestyle.Round), container.BorderTitle(" Current Block ")),
+			),
+			grid.ColWidthPerc(40,
+				grid.Widget(widgets.ValidatorInfo(), container.Border(linestyle.Round), container.BorderTitle(" Validator ")),
 			),
 		),
 		grid.RowHeightPerc(30,
@@ -103,18 +103,12 @@ func main() {
 		),
 	)
 
-	gridOpts, err := builder.Build()
-	if err != nil {
-		panic(err)
-	}
+	gridOpts, _ := builder.Build()
 
-	c, err := container.New(
+	c, _ := container.New(
 		t,
 		gridOpts...,
 	)
-	if err != nil {
-		panic(err)
-	}
 
 	// logic to quite from TUI
 	quit := func(k *terminalapi.Keyboard) {

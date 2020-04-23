@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
-
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/container/grid"
 	"github.com/mum4k/termdash/linestyle"
@@ -20,7 +19,7 @@ type fn func() int
 func CpuUsage() int {
 	progress, err := cpu.Percent(2000*time.Millisecond, false)
 	if err != nil {
-		panic(err)
+		return 0
 	}
 	return int(progress[0])
 }
@@ -28,7 +27,7 @@ func CpuUsage() int {
 func MemoryUsage() int {
 	usage, err := mem.VirtualMemory()
 	if err != nil {
-		panic(err)
+		return 0
 	}
 	return int(usage.UsedPercent)
 }
@@ -36,20 +35,10 @@ func MemoryUsage() int {
 func DiskUsage() int {
 	usage, err := disk.Usage("/")
 	if err != nil {
-		panic(err)
+		return 0
 	}
 	return int(usage.UsedPercent)
 }
-
-// TODO: can be added later
-/*func netUsage() int {
-	usage, err := net.IOCounters(false)
-	fmt.Println(usage[0].BytesRecv)
-	if err!=nil {
-		panic(err)
-	}
-	return int(usage[0].BytesRecv)
-}*/
 
 func refresh(ctx context.Context, gauge *gauge.Gauge, f fn) {
 
@@ -59,9 +48,7 @@ func refresh(ctx context.Context, gauge *gauge.Gauge, f fn) {
 	for {
 		select {
 		case <-ticker.C:
-			if err := gauge.Percent(f()); err != nil {
-				panic(err)
-			}
+			gauge.Percent(f())
 
 		case <-ctx.Done():
 			return
@@ -72,39 +59,30 @@ func refresh(ctx context.Context, gauge *gauge.Gauge, f fn) {
 func CpuLoadGrid(ctx context.Context) []grid.Element {
 
 	// create cpu gauge
-	cpuGauage, err := gauge.New(
+	cpuGauage, _ := gauge.New(
 		gauge.Height(1),
 		gauge.Border(linestyle.Light),
 		gauge.Color(cell.ColorWhite),
 		gauge.BorderTitle(" CPU Usage "),
 	)
-	if err != nil {
-		panic(err)
-	}
 	go refresh(ctx, cpuGauage, CpuUsage)
 
 	// create memory gauge
-	memGauge, err := gauge.New(
+	memGauge, _ := gauge.New(
 		gauge.Height(1),
 		gauge.Border(linestyle.Light),
 		gauge.Color(cell.ColorWhite),
 		gauge.BorderTitle(" Memory Usage "),
 	)
-	if err != nil {
-		panic(err)
-	}
 	go refresh(ctx, memGauge, MemoryUsage)
 
 	// create disk gauge
-	diskGauge, err := gauge.New(
+	diskGauge, _ := gauge.New(
 		gauge.Height(1),
 		gauge.Border(linestyle.Light),
 		gauge.Color(cell.ColorWhite),
 		gauge.BorderTitle(" Disk Usage "),
 	)
-	if err != nil {
-		panic(err)
-	}
 	go refresh(ctx, diskGauge, DiskUsage)
 
 	// create grid structure

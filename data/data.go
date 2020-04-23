@@ -82,9 +82,13 @@ func RefreshData() {
 		if BeaconChainEndpoint != "" {
 			if validatorReply, err := getValidatorInformation(); err == nil {
 				ValidatorInfo = validatorReply
-				lifetimeSigned := numeric.NewDecFromBigInt(ValidatorInfo.Lifetime.Signing.NumBlocksSigned)
-				lifetimeToSign := numeric.NewDecFromBigInt(ValidatorInfo.Lifetime.Signing.NumBlocksToSign)
-				LifetimeAvail = lifetimeSigned.Quo(lifetimeToSign)
+				if lifetime := ValidatorInfo.Lifetime; lifetime != nil {
+					lifetimeSigned := numeric.NewDecFromBigInt(ValidatorInfo.Lifetime.Signing.NumBlocksSigned)
+					lifetimeToSign := numeric.NewDecFromBigInt(ValidatorInfo.Lifetime.Signing.NumBlocksToSign)
+					LifetimeAvail = lifetimeSigned.Quo(lifetimeToSign)
+				} else {
+					LifetimeAvail = numeric.NewDec(0)
+				}
 			}
 		}
 	}

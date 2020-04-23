@@ -9,13 +9,10 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
-
 	"github.com/harmony-one/harmony/common/denominations"
 	"github.com/harmony-one/harmony/numeric"
-
 	"github.com/harmony-one/harmony-tui/data"
 	"github.com/harmony-one/harmony-tui/src"
-
 	"github.com/hpcloud/tail"
 	"github.com/mum4k/termdash/cell"
 	"github.com/mum4k/termdash/widgets/text"
@@ -29,10 +26,7 @@ var (
 func InstanceInfo() *text.Text {
 
 	showEarningRate := false
-	wrapped, err := text.New(text.WrapAtRunes())
-	if err != nil {
-		panic(err)
-	}
+	wrapped, _ := text.New(text.WrapAtRunes())
 
 	go refreshWidget(func() {
 		wrapped.Reset()
@@ -65,10 +59,7 @@ func InstanceInfo() *text.Text {
 
 func ChainInfo() *text.Text {
 
-	widget, err1 := text.New(text.WrapAtRunes())
-	if err1 != nil {
-		panic(err1)
-	}
+	widget, _ := text.New(text.WrapAtRunes())
 
 	go refreshWidget(func() {
 
@@ -93,10 +84,7 @@ func ChainInfo() *text.Text {
 
 func BlockInfo() *text.Text {
 
-	widget, err1 := text.New(text.WrapAtRunes())
-	if err1 != nil {
-		panic(err1)
-	}
+	widget, _ := text.New(text.WrapAtRunes())
 
 	go refreshWidget(func() {
 		widget.Reset()
@@ -115,10 +103,7 @@ func BlockInfo() *text.Text {
 }
 
 func ValidatorInfo() *text.Text {
-	widget, err := text.New(text.WrapAtRunes())
-	if err != nil {
-		panic(err)
-	}
+	widget, _ := text.New(text.WrapAtRunes())
 
 	go refreshWidget(func() {
 		widget.Reset()
@@ -162,10 +147,8 @@ func ValidatorInfo() *text.Text {
 }
 
 func LogInfo(ctx context.Context) *text.Text {
-	widget, err := text.New(text.RollContent(), text.WrapAtWords())
-	if err != nil {
-		panic(err)
-	}
+	widget, _ := text.New(text.RollContent(), text.WrapAtWords())
+
 	go refreshLog(ctx, widget)
 	return widget
 }
@@ -174,33 +157,20 @@ func refreshLog(ctx context.Context, widget *text.Text) {
 
 	fname, err := src.GetLogFilePath("zerolog")
 	if err != nil {
-		if err = widget.Write(err.Error()); err != nil {
-			panic(err)
-		}
+		widget.Write(err.Error())
 		return
 	}
 
 	t, err := tail.TailFile(fname, tail.Config{ReOpen: true, Follow: true, MustExist: false, Logger: log.New(ioutil.Discard, "", 0), Location: &tail.SeekInfo{Offset: 1, Whence: 2}})
 	defer t.Cleanup()
 	for line := range t.Lines {
-		if err = widget.Write(line.Text); err != nil {
-			panic(err)
-		}
-		if err = widget.Write("\n"); err != nil {
-			panic(err)
-		}
+		widget.Write(line.Text)
+		widget.Write("\n")
 	}
 }
 
 func refreshWidget(f func()) {
-
-	ticker := time.NewTicker(viper.GetDuration("WidgetInterval"))
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ticker.C:
-			f()
-		}
+	for range time.Tick(viper.GetDuration("WidgetInterval")) {
+		f()
 	}
 }

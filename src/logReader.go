@@ -9,21 +9,14 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
-
 	"github.com/harmony-one/harmony-tui/data"
 )
 
 var previousJSONString = ""
 
 func TailZeroLogFile() {
-	ticker := time.NewTicker(time.Second * 5)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ticker.C:
-			readLogs()
-		}
+	for range time.Tick(time.Second * 5) {
+		readLogs()
 	}
 }
 
@@ -31,17 +24,11 @@ func GetLogFilePath(prefix string) (string, error) {
 	root := viper.GetString("LogPath")
 	lastModified := time.Time{}
 	var file string
-	check, err := exists(root)
-
-	if err != nil {
-		panic(err)
+	if check, _ := exists(root); !check {
+		return "", errors.New("log path does not exist")
 	}
 
-	if !check {
-		return "", errors.New("Not Exists")
-	}
-
-	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+	if err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if strings.HasPrefix(info.Name(), prefix) && strings.HasSuffix(info.Name(), ".log") {
 			if lastModified.Before(info.ModTime()) {
 				file = path
@@ -49,9 +36,8 @@ func GetLogFilePath(prefix string) (string, error) {
 			}
 		}
 		return nil
-	})
-	if err != nil {
-		panic(err)
+	}); err != nil {
+		return "", errors.New("log path does not exist")
 	}
 	return file, nil
 }

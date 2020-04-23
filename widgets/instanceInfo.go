@@ -50,8 +50,6 @@ func InstanceInfo() *text.Text {
 		}
 
 		wrapped.Write("\n\n " + data.Balance)
-
-		wrapped.Write("\n\nCurrent time: " + time.Now().Format("15:04:05 Jan _2 MST"))
 	})
 
 	return wrapped
@@ -77,6 +75,8 @@ func ChainInfo() *text.Text {
 		widget.Write("\n OnAnnounce  : " + data.OnAnnounce)
 		widget.Write("\n OnPrepared  : " + data.OnPrepared)
 		widget.Write("\n OnCommitted : " + data.OnCommitted)
+
+		wrapped.Write("\n\n Current time: " + time.Now().Format("15:04:05 Jan _2 MST"))
 	})
 
 	return widget
@@ -90,8 +90,8 @@ func BlockInfo() *text.Text {
 		widget.Reset()
 		widget.Write(" Block Number: " + strconv.FormatFloat(data.LatestHeader.BlockNumber, 'f', 0, 64))
 		widget.Write("\n Block Size: " + strconv.Itoa(data.LatestBlock.BlockSizeInt))
-		widget.Write("\n Num transactions in block: " + strconv.Itoa(data.LatestBlock.NumTransactions))
-		widget.Write("\n Num staking transactions in block: " + strconv.Itoa(data.LatestBlock.NumStakingTransactions))
+		widget.Write("\n Num transactions: " + strconv.Itoa(data.LatestBlock.NumTransactions))
+		widget.Write("\n Num staking transactions: " + strconv.Itoa(data.LatestBlock.NumStakingTransactions))
 		widget.Write("\n Block Hash: " + data.LatestHeader.BlockHash)
 		widget.Write("\n Block Epoch: " + strconv.Itoa(data.LatestHeader.Epoch))
 		widget.Write("\n Block Shard: " + strconv.Itoa(int(data.LatestHeader.ShardID)))

@@ -154,7 +154,7 @@ func LogInfo(ctx context.Context) *text.Text {
 }
 
 func refreshLog(ctx context.Context, widget *text.Text) {
-
+	widget.Reset()
 	fname, err := src.GetLogFilePath("zerolog")
 	if err != nil {
 		widget.Write(err.Error())

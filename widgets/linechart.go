@@ -46,6 +46,7 @@ func playLineChart(lc *linechart.LineChart) {
 			floatRate, _ := earningRate.Float64()
 			values = append(values, floatRate)
 			if len(values) > 15 {
+				values[0] = 0
 				values = values[1:]
 			}
 

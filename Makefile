@@ -27,4 +27,4 @@ run: build
 static:
 	make -C $(TOP)/mcl
 	make -C $(TOP)/bls minimised_static BLS_SWAP_G=1
-	source $(TOP)/harmony/scripts/setup_bls_build_flags.sh && go build -ldflags="$(ldflags) -w -extldflags \"-static\"" -o ${BINARY_DIR}/$(BINARY_NAME)
+	HMY_PATH=$(realpath ..) source $(TOP)/harmony/scripts/setup_bls_build_flags.sh && go build -ldflags="$(ldflags) -w -extldflags \"-static\"" -o ${BINARY_DIR}/$(BINARY_NAME)

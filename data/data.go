@@ -85,7 +85,11 @@ func RefreshData() {
 				if lifetime := ValidatorInfo.Lifetime; lifetime != nil {
 					lifetimeSigned := numeric.NewDecFromBigInt(ValidatorInfo.Lifetime.Signing.NumBlocksSigned)
 					lifetimeToSign := numeric.NewDecFromBigInt(ValidatorInfo.Lifetime.Signing.NumBlocksToSign)
-					LifetimeAvail = lifetimeSigned.Quo(lifetimeToSign)
+					if lifetimeToSign.GT(numeric.NewDec(0)) {
+						LifetimeAvail = lifetimeSigned.Quo(lifetimeToSign)
+					} else {
+						LifetimeAvail = numeric.NewDec(0)
+					}
 				} else {
 					LifetimeAvail = numeric.NewDec(0)
 				}
